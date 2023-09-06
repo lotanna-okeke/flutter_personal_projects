@@ -50,9 +50,8 @@ class UserPlacesNotififer extends StateNotifier<List<Place>> {
           ),
         )
         .toList();
-
-    print('places');
-    state = places;
+    final output = places.reversed.toList();
+    state = output;
     // state = [...state];
   }
 
