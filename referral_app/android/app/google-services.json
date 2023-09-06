@@ -1,0 +1,82 @@
+{
+  "project_info": {
+    "project_number": "483730233887",
+    "project_id": "fir-project-819d1",
+    "storage_bucket": "fir-project-819d1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:483730233887:android:683ecf9e50b870b82cd32a",
+        "android_client_info": {
+          "package_name": "com.example.referral_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "483730233887-ot5e9qik0sokkl24j0e7g031slvcau17.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBUwnYRSnWw8Uaq9UP3Cxacldyv9jzR4_Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "483730233887-ot5e9qik0sokkl24j0e7g031slvcau17.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "483730233887-0jvkla7qfe2q851r45p50q27t432kv07.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.referralApp"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:483730233887:android:14727beb9abf1f102cd32a",
+        "android_client_info": {
+          "package_name": "com.example.test_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "483730233887-ot5e9qik0sokkl24j0e7g031slvcau17.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBUwnYRSnWw8Uaq9UP3Cxacldyv9jzR4_Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "483730233887-ot5e9qik0sokkl24j0e7g031slvcau17.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "483730233887-0jvkla7qfe2q851r45p50q27t432kv07.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.referralApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
