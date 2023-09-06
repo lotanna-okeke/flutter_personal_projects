@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:math';
 
 import 'package:chat_app/widgets/user_image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -113,10 +112,10 @@ class _AuthScreenState extends State<AuthScreen> {
                 child: Image.asset('assets\\images\\chat.png'),
               ),
               Card(
-                margin: EdgeInsets.all(20),
+                margin: const EdgeInsets.all(20),
                 child: SingleChildScrollView(
                   child: Padding(
-                    padding: EdgeInsets.all(15),
+                    padding: const EdgeInsets.all(15),
                     child: Form(
                       key: _formkey,
                       child: Column(
