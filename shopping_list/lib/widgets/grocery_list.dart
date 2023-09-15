@@ -38,8 +38,6 @@ class _GroceryListState extends State<GroceryList> {
         }
       });
 
-      print(response.body);
-
       if (response.body == 'null') {
         setState(() {
           _isLoading = false;
@@ -78,7 +76,7 @@ class _GroceryListState extends State<GroceryList> {
   }
 
   void _removeItem(GroceryItem item) async {
-    final _itemIndex = _groceryItems.indexOf(item);
+    final itemIndex = _groceryItems.indexOf(item);
     setState(() {
       _groceryItems.remove(item);
     });
@@ -110,7 +108,7 @@ class _GroceryListState extends State<GroceryList> {
         ),
       );
       setState(() {
-        _groceryItems.insert(_itemIndex, item);
+        _groceryItems.insert(itemIndex, item);
       });
     }
   }

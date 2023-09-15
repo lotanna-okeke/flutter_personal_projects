@@ -10,21 +10,24 @@ class MainDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return Drawer(
       child: Column(
         children: [
           DrawerHeader(
             padding: EdgeInsets.all(20),
             decoration: BoxDecoration(
-                gradient: LinearGradient(
-              colors: [
-                Theme.of(context).colorScheme.primaryContainer,
-                Theme.of(context).colorScheme.primaryContainer.withOpacity(0.8)
-              ],
-              begin: Alignment.topLeft, //topLeft
-              end: Alignment.bottomRight,
-            )),
+              gradient: LinearGradient(
+                colors: [
+                  Theme.of(context).colorScheme.primaryContainer,
+                  Theme.of(context)
+                      .colorScheme
+                      .primaryContainer
+                      .withOpacity(0.8)
+                ],
+                begin: Alignment.topLeft, //topLeft
+                end: Alignment.bottomRight,
+              ),
+            ),
             child: Row(
               children: [
                 Icon(
