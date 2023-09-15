@@ -2,20 +2,26 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:v2n_merchants/data.dart';
 import 'package:v2n_merchants/models/merchant.dart';
 
-class NewMerchant extends ConsumerStatefulWidget {
-  const NewMerchant({super.key});
+class NewMerchant extends StatefulWidget {
+  const NewMerchant({
+    super.key,
+    this.merchant,
+  });
+
+  final Merchant? merchant;
 
   @override
-  ConsumerState<NewMerchant> createState() => _NewMerchantState();
+  State<NewMerchant> createState() => _NewMerchantState();
 }
 
-class _NewMerchantState extends ConsumerState<NewMerchant> {
+class _NewMerchantState extends State<NewMerchant> {
   final _formKey = GlobalKey<FormState>();
+  bool _isEditing = false;
+
   var _name = '';
   var _email = '';
   var _password = '';
@@ -24,6 +30,25 @@ class _NewMerchantState extends ConsumerState<NewMerchant> {
   var _b2b = '';
   var _portalId = '';
   var _portalPassword = '';
+  Merchant? merchant;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    if (widget.merchant != null) {
+      _isEditing = true;
+      merchant = widget.merchant;
+      _name = merchant!.name;
+      _email = merchant!.email;
+      _password = merchant!.password;
+      _airtime = merchant!.airtimeId;
+      _data = merchant!.dataId;
+      _b2b = merchant!.b2bId;
+      _portalId = merchant!.portalId;
+      _portalPassword = merchant!.portalPassword;
+    }
+  }
 
   void _createMerchant() async {
     if (_formKey.currentState!.validate()) {
@@ -78,12 +103,14 @@ class _NewMerchantState extends ConsumerState<NewMerchant> {
     }
   }
 
+  void _editMerchant() async {}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const Text('Create New Merchant'),
+        title: Text(_isEditing ? 'Edit Merchant' : 'Create New Merchant'),
         backgroundColor: logoColors[1]!.withOpacity(0.8),
         foregroundColor: Colors.white,
       ),
@@ -117,16 +144,18 @@ class _NewMerchantState extends ConsumerState<NewMerchant> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             TextFormField(
+                              initialValue: _name,
                               style: const TextStyle(color: Colors.black),
                               decoration: InputDecoration(
                                   labelText: 'Company Name',
-                                  hintText: 'VAS2Nets Technologies',
+                                  hintText: _isEditing
+                                      ? "${widget.merchant!.name}"
+                                      : 'VAS2Nets Technologies',
                                   hintStyle: TextStyle(
                                       color: Theme.of(context)
                                           .colorScheme
                                           .primary
                                           .withOpacity(0.7))),
-                              keyboardType: TextInputType.emailAddress,
                               autocorrect: false,
                               textCapitalization: TextCapitalization.none,
                               validator: (value) {
@@ -144,7 +173,9 @@ class _NewMerchantState extends ConsumerState<NewMerchant> {
                               style: const TextStyle(color: Colors.black),
                               decoration: InputDecoration(
                                   labelText: 'Email Address',
-                                  hintText: 'john123@gmail.com',
+                                  hintText: _isEditing
+                                      ? widget.merchant!.email
+                                      : 'john123@gmail.com',
                                   hintStyle: TextStyle(
                                       color: Theme.of(context)
                                           .colorScheme
@@ -168,10 +199,11 @@ class _NewMerchantState extends ConsumerState<NewMerchant> {
                             ),
                             TextFormField(
                               style: const TextStyle(color: Colors.black),
-                              decoration: const InputDecoration(
+                              decoration: InputDecoration(
                                 labelText: 'Password',
+                                hintText:
+                                    _isEditing ? widget.merchant!.password : "",
                               ),
-                              keyboardType: TextInputType.emailAddress,
                               obscureText: true,
                               validator: (value) {
                                 if (value == null ||
@@ -189,10 +221,12 @@ class _NewMerchantState extends ConsumerState<NewMerchant> {
                             ),
                             TextFormField(
                               style: const TextStyle(color: Colors.black),
-                              decoration: const InputDecoration(
+                              decoration: InputDecoration(
                                 labelText: 'Airtime-ID',
+                                hintText: _isEditing
+                                    ? widget.merchant!.airtimeId
+                                    : "",
                               ),
-                              keyboardType: TextInputType.emailAddress,
                               obscureText: true,
                               validator: (value) {
                                 if (value == null || value.trim().length < 2) {
@@ -207,10 +241,11 @@ class _NewMerchantState extends ConsumerState<NewMerchant> {
                             ),
                             TextFormField(
                               style: const TextStyle(color: Colors.black),
-                              decoration: const InputDecoration(
+                              decoration: InputDecoration(
                                 labelText: 'Data-ID',
+                                hintText:
+                                    _isEditing ? widget.merchant!.dataId : "",
                               ),
-                              keyboardType: TextInputType.emailAddress,
                               obscureText: true,
                               validator: (value) {
                                 if (value == null || value.trim().length < 2) {
@@ -225,10 +260,11 @@ class _NewMerchantState extends ConsumerState<NewMerchant> {
                             ),
                             TextFormField(
                               style: const TextStyle(color: Colors.black),
-                              decoration: const InputDecoration(
+                              decoration: InputDecoration(
                                 labelText: 'B2B-ID',
+                                hintText:
+                                    _isEditing ? widget.merchant!.b2bId : "",
                               ),
-                              keyboardType: TextInputType.emailAddress,
                               obscureText: true,
                               validator: (value) {
                                 if (value == null || value.trim().length < 2) {
@@ -243,10 +279,11 @@ class _NewMerchantState extends ConsumerState<NewMerchant> {
                             ),
                             TextFormField(
                               style: const TextStyle(color: Colors.black),
-                              decoration: const InputDecoration(
+                              decoration: InputDecoration(
                                 labelText: 'Portal-ID',
+                                hintText:
+                                    _isEditing ? widget.merchant!.portalId : "",
                               ),
-                              keyboardType: TextInputType.emailAddress,
                               obscureText: true,
                               validator: (value) {
                                 if (value == null || value.trim().length < 2) {
@@ -261,10 +298,12 @@ class _NewMerchantState extends ConsumerState<NewMerchant> {
                             ),
                             TextFormField(
                               style: const TextStyle(color: Colors.black),
-                              decoration: const InputDecoration(
+                              decoration: InputDecoration(
                                 labelText: 'Portal Password',
+                                hintText: _isEditing
+                                    ? widget.merchant!.portalPassword
+                                    : "",
                               ),
-                              keyboardType: TextInputType.emailAddress,
                               obscureText: true,
                               validator: (value) {
                                 if (value == null || value.trim().length < 2) {

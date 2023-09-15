@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:v2n_merchants/data.dart';
-import 'package:v2n_merchants/screens/admin/admin.dart';
-import 'package:v2n_merchants/screens/admin/adminHome.dart';
-import 'package:v2n_merchants/screens/admin/new_merchant.dart';
+import 'package:v2n_merchants/admin/screens/adminHome.dart';
+import 'package:v2n_merchants/admin/screens/new_merchant.dart';
 import 'package:v2n_merchants/screens/welcome.dart';
 
 void main() {
   runApp(
-    const ProviderScope(child: MyApp()),
+    const MyApp(),
   );
 }
 
@@ -28,9 +27,8 @@ class MyApp extends StatelessWidget {
         ),
         scaffoldBackgroundColor: Color.fromARGB(255, 248, 248, 248),
       ),
-      home: const AdminHomeScreen(),
-      // home: const AdminScreen(),
-      // home: const WelcomeScreen(),
+      // home: const AdminHomeScreen(),
+      home: const WelcomeScreen(),
     );
   }
 }

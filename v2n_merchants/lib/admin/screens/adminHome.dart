@@ -1,22 +1,21 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:v2n_merchants/data.dart';
 import 'package:v2n_merchants/models/merchant.dart';
-import 'package:v2n_merchants/screens/admin/merchant%20list/merchant_list.dart';
-import 'package:v2n_merchants/screens/admin/new_merchant.dart';
-import 'package:v2n_merchants/widgets/admin_drawer.dart';
+import 'package:v2n_merchants/admin/widgets/merchant_list.dart';
+import 'package:v2n_merchants/admin/screens/new_merchant.dart';
+import 'package:v2n_merchants/admin/widgets/admin_drawer.dart';
 
-class AdminHomeScreen extends ConsumerStatefulWidget {
+class AdminHomeScreen extends StatefulWidget {
   const AdminHomeScreen({super.key});
 
   @override
-  ConsumerState<AdminHomeScreen> createState() => _AdminHomeScreenState();
+  State<AdminHomeScreen> createState() => _AdminHomeScreenState();
 }
 
-class _AdminHomeScreenState extends ConsumerState<AdminHomeScreen> {
+class _AdminHomeScreenState extends State<AdminHomeScreen> {
   List<Merchant> _merchants = [];
   var _isLoading = true;
   String? _error;
@@ -96,40 +95,67 @@ class _AdminHomeScreenState extends ConsumerState<AdminHomeScreen> {
     });
   }
 
-  void deleteMerchant(Merchant merchant) async {
+  void deleteMerchant(Merchant merchant) {
     final merchantIndex = _merchants.indexOf(merchant);
-    setState(() {
-      _merchants.remove(merchant);
-    });
-    final url = Uri.https('v2n-merchant-default-rtdb.firebaseio.com',
-        'merchants/${merchant.id}.json');
-    final response = await http.delete(url);
-    if (response.statusCode == 200) {
-      ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          duration: const Duration(seconds: 3),
-          content: Text(
-            "${merchant.name} Deleted",
-            textAlign: TextAlign.center,
-          ),
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          duration: Duration(seconds: 3),
-          content: Text(
-            "Invalid URL",
-            textAlign: TextAlign.center,
-          ),
-        ),
-      );
+
+    // Check if the merchant was found in the list.
+    if (merchantIndex != -1) {
       setState(() {
-        _merchants.insert(merchantIndex, merchant);
+        _merchants.removeAt(merchantIndex);
       });
+    } else {
+      // Handle the case where the merchant was not found.
+      print("Merchant not found: ${merchant.name}");
     }
+
+    // final url = Uri.https('v2n-merchant-default-rtdb.firebaseio.com',
+    //     'merchants/${merchant.id}.json');
+    // final response = await http.delete(url);
+    // if (response.statusCode == 200) {
+    //   ScaffoldMessenger.of(context).clearSnackBars();
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     SnackBar(
+    //       duration: const Duration(seconds: 3),
+    //       content: Text(
+    //         "${merchant.name} Deleted",
+    //         textAlign: TextAlign.center,
+    //       ),
+    //     ),
+    //   );
+    // } else {
+    //   ScaffoldMessenger.of(context).clearSnackBars();
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     const SnackBar(
+    //       duration: Duration(seconds: 3),
+    //       content: Text(
+    //         "Invalid URL",
+    //         textAlign: TextAlign.center,
+    //       ),
+    //     ),
+    //   );
+    //   setState(() {
+    //     _merchants.insert(merchantIndex, merchant);
+    //   });
+    // }
+  }
+
+  void editMerchant(Merchant merchant) async {
+    final merchantIndex = _merchants.indexOf(merchant);
+    final edittedMerchant = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => NewMerchant(merchant: merchant),
+      ),
+    );
+
+    if (edittedMerchant == null) {
+      return;
+    }
+
+    setState(() {
+      _merchants
+          .replaceRange(merchantIndex, merchantIndex + 1, [edittedMerchant]);
+    });
   }
 
   @override
@@ -208,6 +234,7 @@ class _AdminHomeScreenState extends ConsumerState<AdminHomeScreen> {
               child: MerchantList(
                 merchants: _merchants,
                 onRemoveMerchant: deleteMerchant,
+                onEditMerchant: editMerchant,
               ),
             ),
           ],

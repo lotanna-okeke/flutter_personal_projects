@@ -1,28 +1,44 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:v2n_merchants/models/merchant.dart';
-import 'package:v2n_merchants/providers/merchant_provier.dart';
+import 'dart:convert';
 
-class MerchantItem extends ConsumerStatefulWidget {
+import 'package:http/http.dart' as http;
+import 'package:flutter/material.dart';
+import 'package:v2n_merchants/models/merchant.dart';
+
+class MerchantItem extends StatefulWidget {
   const MerchantItem({
     super.key,
     required this.merchant,
     required this.onRemoveMerchant,
+    required this.onEditMerchant,
   });
   final Merchant merchant;
   final Function(Merchant merchant) onRemoveMerchant;
+  final Function(Merchant merchant) onEditMerchant;
 
   @override
-  ConsumerState<MerchantItem> createState() => _MerchantItemState();
+  State<MerchantItem> createState() => _MerchantItemState();
 }
 
-class _MerchantItemState extends ConsumerState<MerchantItem> {
+class _MerchantItemState extends State<MerchantItem> {
   Merchant? merchant;
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     merchant = widget.merchant;
+  }
+
+  void changeActiveStatus(Merchant merchant) async {
+    final url = Uri.https('v2n-merchant-default-rtdb.firebaseio.com',
+        'merchants/${merchant.id}.json');
+    await http.patch(
+      url,
+      body: json.encode(
+        {
+          'active': merchant.isActive,
+        },
+      ),
+    );
   }
 
   @override
@@ -52,7 +68,9 @@ class _MerchantItemState extends ConsumerState<MerchantItem> {
                 Row(
                   children: [
                     IconButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        widget.onEditMerchant(merchant!);
+                      },
                       color: Colors.black,
                       icon: const Icon(
                         Icons.edit,
@@ -87,9 +105,7 @@ class _MerchantItemState extends ConsumerState<MerchantItem> {
                   onPressed: () {
                     setState(() {
                       merchant!.isActive = !merchant!.isActive;
-                      ref
-                          .read(MerchantHandlerProvider.notifier)
-                          .changeActiveStatus(merchant!);
+                      changeActiveStatus(merchant!);
                     });
                   },
                   icon: Icon(merchant!.isActive ? Icons.thumb_up : Icons.block,

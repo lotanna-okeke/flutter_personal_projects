@@ -1,9 +1,7 @@
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:v2n_merchants/data.dart';
 import 'package:v2n_merchants/models/merchant.dart';
 
 class MerchantHandlerNotifier extends StateNotifier<List<Merchant>> {
@@ -17,7 +15,7 @@ class MerchantHandlerNotifier extends StateNotifier<List<Merchant>> {
     final url =
         Uri.https('v2n-merchant-default-rtdb.firebaseio.com', 'merchants.json');
 
-    final response = await http.post(
+    await http.post(
       url,
       headers: {'Contain-Type': 'application/json'},
       body: jsonEncode(

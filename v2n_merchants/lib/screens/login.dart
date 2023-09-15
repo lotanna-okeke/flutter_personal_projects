@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:v2n_merchants/data.dart';
-import 'package:v2n_merchants/screens/admin/adminHome.dart';
+import 'package:v2n_merchants/admin/screens/adminHome.dart';
 import 'package:v2n_merchants/widgets/term_of_use.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -15,11 +18,23 @@ class _LoginScreenState extends State<LoginScreen> {
   var _enteredEmail = "";
   var _enteredPassword = "";
 
-  void _login() {
+  void _login() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
-      if (_enteredEmail == 'admin@v2n.com' && _enteredPassword == '#1Aaaa') {
+      final url = Uri.parse(
+          'http://132.226.206.68/vaswrapper/jsdev/clientmanager/login');
+      final response = await http.post(
+        url,
+        body: jsonEncode(
+          {
+            "username": _enteredEmail,
+            "password": _enteredPassword,
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -37,6 +52,7 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     }
   }
+
 
   void _showTerms() {
     showModalBottomSheet(
@@ -89,10 +105,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           autocorrect: false,
                           textCapitalization: TextCapitalization.none,
                           validator: (value) {
-                            final validEmail =
-                                RegExp("^[a-zA-Z0-9+_.-]+@[a-z]+.[a-z]");
-                            if (!(value!.contains(validEmail))) {
-                              return "Invalid email address";
+                            if (value == null) {
+                              return 'Email cannot be empty';
                             }
 
                             return null;
@@ -109,13 +123,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           keyboardType: TextInputType.emailAddress,
                           obscureText: true,
                           validator: (value) {
-                            if (value == null ||
-                                value.trim().length < 6 ||
-                                !value.contains(RegExp(r'[A-Z]')) ||
-                                !value.contains(RegExp(r'[a-z]')) ||
-                                !value.contains(RegExp(r'[0-9]'))) {
-                              return "Must contain at least 6 chararcters with: \n.A number\n.A capital letter\n.A small letter";
+                            if (value == null) {
+                              return 'Password cannot be empty';
                             }
+
                             return null;
                           },
                           onSaved: (newValue) {

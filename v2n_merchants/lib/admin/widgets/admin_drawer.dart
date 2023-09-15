@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:v2n_merchants/screens/admin/adminHome.dart';
-import 'package:v2n_merchants/screens/admin/new_merchant.dart';
+import 'package:v2n_merchants/admin/screens/adminHome.dart';
+import 'package:v2n_merchants/admin/screens/new_merchant.dart';
 
 class AdminDrawer extends StatelessWidget {
   const AdminDrawer({super.key});
