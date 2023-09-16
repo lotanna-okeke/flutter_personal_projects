@@ -27,8 +27,8 @@ class MyApp extends StatelessWidget {
         ),
         scaffoldBackgroundColor: Color.fromARGB(255, 248, 248, 248),
       ),
-      // home: const AdminHomeScreen(),
-      home: const WelcomeScreen(),
+      home: const AdminHomeScreen(),
+      // home: const WelcomeScreen(),
     );
   }
 }

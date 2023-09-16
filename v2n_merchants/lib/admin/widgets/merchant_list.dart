@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:v2n_merchants/models/merchant.dart';
 import 'package:v2n_merchants/admin/widgets/merchant_item.dart';
 
-class MerchantList extends StatelessWidget {
+class MerchantList extends StatefulWidget {
   const MerchantList({
     super.key,
     required this.merchants,
@@ -15,13 +15,18 @@ class MerchantList extends StatelessWidget {
   final Function(Merchant merchant) onEditMerchant;
 
   @override
+  State<MerchantList> createState() => _MerchantListState();
+}
+
+class _MerchantListState extends State<MerchantList> {
+  @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      itemCount: merchants.length,
+      itemCount: widget.merchants.length,
       itemBuilder: (context, index) => MerchantItem(
-        merchant: merchants[index],
-        onRemoveMerchant: onRemoveMerchant,
-        onEditMerchant: onEditMerchant,
+        merchant: widget.merchants[index],
+        onRemoveMerchant: widget.onRemoveMerchant,
+        onEditMerchant: widget.onEditMerchant,
       ),
     );
   }
