@@ -10,7 +10,12 @@ import 'package:v2n_merchants/admin/screens/new_merchant.dart';
 import 'package:v2n_merchants/admin/widgets/admin_drawer.dart';
 
 class AdminHomeScreen extends StatefulWidget {
-  const AdminHomeScreen({super.key});
+  const AdminHomeScreen({
+    super.key,
+    this.token,
+  });
+
+  final String? token;
 
   @override
   State<AdminHomeScreen> createState() => _AdminHomeScreenState();
@@ -29,8 +34,8 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
   }
 
   void _loadItmes() async {
-    final url =
-        Uri.https('v2n-merchant-default-rtdb.firebaseio.com', 'merchants.json');
+    final url = Uri.parse(
+        'https://v2n-merchant-default-rtdb.firebaseio.com/merchants.json?_limit=1&_page=1');
     ;
 
     try {
@@ -348,7 +353,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
 
     return Scaffold(
       // backgroundColor: logoColors[2],
-      backgroundColor: const Color.fromARGB(255, 220, 220, 220),
+      // backgroundColor: const Color.fromARGB(255, 220, 220, 220),
       appBar: AppBar(
         foregroundColor: Colors.white,
         title: const Text(

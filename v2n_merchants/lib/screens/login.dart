@@ -35,12 +35,33 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       if (response.statusCode == 200) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => AdminHomeScreen(),
-          ),
+        final output = jsonDecode(response.body);
+        final token = output['token'];
+        print(token);
+        final url2 = Uri.parse(
+            'http://132.226.206.68/vaswrapper/jsdev/clientmanager/fetch-merchants?page=1&perPage=10');
+        Map<String, String> headers = {
+          "Authorization": 'Bearer $token',
+        };
+        final response2 = await http.get(
+          url2,
+          headers: headers,
         );
+
+        print(response2.statusCode);
+
+        if (response2.statusCode == 200) {
+          final merchants = jsonDecode(response2.body);
+          print(merchants);
+        }
+        // Navigator.push(
+        //   context,
+        //   MaterialPageRoute(
+        //     builder: (context) => AdminHomeScreen(
+        //       token: token,
+        //     ),
+        //   ),
+        // );
       } else {
         ScaffoldMessenger.of(context).clearSnackBars();
         ScaffoldMessenger.of(context).showSnackBar(
@@ -53,6 +74,33 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  void login() async {
+    final apiUrl = Uri.parse(
+        'http://132.226.206.68/vaswrapper/jsdev/clientmanager/fetch-merchants');
+    String bearerToken =
+        "J0oQRMjI8lP6dmP6GNRjDQBg9ezbLcpWClFAgaGjILOuVcam9xMR5gVLVza3FuWUr6ySZlkvdu4M79OuppY5KqAaxgxrGO44BuSORcVqUZEWvTfYmlHd11WnyxjZwzy2w1CgsppbQ4Z5ryfx2Clg8ex8Sw2H4hgottxZQy7mjbXq1u46fXFXKw6MSzJYoDPWaRGjQ0Lu";
+
+    final headers = {
+      'Authorization': 'Bearer $bearerToken',
+    };
+
+// Make an HTTP GET request with headers
+    var response = await http.get(
+      apiUrl,
+      headers: {
+        'Authorization': 'Bearer $bearerToken',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      // Request was successful, handle the response data here
+      print('Response data: ${response.body}');
+    } else {
+      // Request failed, handle errors here
+      print('Request failed with status code: ${response.statusCode}');
+      print('Response data: ${response.body}');
+    }
+  }
 
   void _showTerms() {
     showModalBottomSheet(
@@ -149,7 +197,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         const SizedBox(height: 10),
                         ElevatedButton(
-                          onPressed: _login,
+                          onPressed: login,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: logoColors[1],
                           ),

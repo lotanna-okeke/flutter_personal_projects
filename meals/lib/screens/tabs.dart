@@ -26,7 +26,6 @@ class TabsScreen extends ConsumerStatefulWidget {
 class _TabsScreenState extends ConsumerState<TabsScreen> {
   int _selectedPageIndex = 0;
 
-
   void _selectPage(int index) {
     setState(() {
       _selectedPageIndex = index;
