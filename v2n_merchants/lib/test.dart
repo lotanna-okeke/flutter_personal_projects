@@ -11,13 +11,11 @@ class Test extends StatefulWidget {
 class _TestState extends State<Test> {
   void login() async {
     final apiUrl = Uri.parse(
-        'http://132.226.206.68/vaswrapper/jsdev/clientmanager/fetch-merchants.json');
+        'http://132.226.206.68/vaswrapper/jsdev/clientmanager/fetch-merchants?page=1&perPage=100');
     const bearerToken =
-        "OyxIhAYBVUKcb5k1Gsg5L9oNAb33OsRHcbiNDcdgZmpKl5NI2GbrDb7G4xNb9EQMoEiuYnuEGdnrCGETVF7RGmmOJv3MuEl22rmXPvOpE8xUpNQ97Jgjqgm7pb6f9AiImBd9GXH6cPDbS5bTqIf7xRIK8s5EcEp9rohCFcVAZSR1bTrqiFg9g3Wa3mli54zbu3NAkvZB";
+        "ILT8yreYHoUruGwMts0OzAR88daUUCbBoR7XPa5hPUxkVqPc4zYKCfP8Yp0FvYlsr2yETajXYJcAVwVTO0mWuRbDUAYlw7xKRv7W2Q02111ffBMv5HQJRBNdZvmmYn9XjGkNPKr9wiMM0errEcKwKd3ks3o9Ism9kLPQ76zxTHWk1pAv0H9lsa2ySBdrtW5AEX5eWOSy";
 
     final headers = {
-      'Content-Type': 'application/json; charset=utf-8',
-      'Accept': 'application/json',
       'Authorization': 'Bearer $bearerToken',
     };
     print(headers);
@@ -27,8 +25,6 @@ class _TestState extends State<Test> {
         apiUrl,
         headers: headers,
       );
-
-      print(response);
 
       if (response.statusCode == 200) {
         // Request was successful, print the response body

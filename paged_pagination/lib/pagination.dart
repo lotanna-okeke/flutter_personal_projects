@@ -27,9 +27,6 @@ class _PageBasedPaginationExampleState
   }
 
   void setButtons(int page) {
-    // setState(() {
-    //   _isFirstPage =
-    // });
     if (page == _totalPages) {
       setState(() {
         _isLastPage = true;
@@ -57,7 +54,6 @@ class _PageBasedPaginationExampleState
     // print(_currentPage)
     // Simulate loading data from an API or another source for the specified page.
     await Future.delayed(Duration(seconds: 2));
-    print('load');
     // Generate data for the current page.
     final url = Uri.parse(
         'https://jsonplaceholder.typicode.com/posts?_limit=$_pageSize&_page=$page');

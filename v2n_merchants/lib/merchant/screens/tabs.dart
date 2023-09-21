@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:v2n_merchants/merchant/screens/airtime.dart';
 import 'package:v2n_merchants/merchant/screens/b2b.dart';
+import 'package:v2n_merchants/merchant/screens/data.dart';
 import 'package:v2n_merchants/merchant/screens/merchantHome.dart';
 
 class TabsScreen extends StatefulWidget {
@@ -20,10 +22,30 @@ class _TabsScreenState extends State<TabsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    Widget activePage = const MerchantHomeScreen();
+    Widget activePage = MerchantHomeScreen(
+      changeTab: (pageIndex) {
+        setState(() {
+          _selectedPageIndex = pageIndex;
+        });
+      },
+    );
 
     if (_selectedPageIndex == 1) {
       activePage = const B2BScreen();
+    }
+
+    switch (_selectedPageIndex) {
+      case 1:
+        activePage = B2BScreen();
+        break;
+      case 2:
+        activePage = AirtimeScreen();
+        break;
+      case 3:
+        activePage = DataScreen();
+        break;
+      default:
+        break;
     }
 
     return Scaffold(
@@ -45,17 +67,20 @@ class _TabsScreenState extends State<TabsScreen> {
             label: 'Home',
             backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           ),
-          const BottomNavigationBarItem(
+          BottomNavigationBarItem(
             icon: Icon(Icons.work),
             label: 'B2B',
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           ),
-          const BottomNavigationBarItem(
+          BottomNavigationBarItem(
             icon: Icon(Icons.call),
             label: 'Airtime',
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           ),
-          const BottomNavigationBarItem(
+          BottomNavigationBarItem(
             icon: Icon(Icons.wifi),
             label: 'Data',
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           ),
         ],
       ),

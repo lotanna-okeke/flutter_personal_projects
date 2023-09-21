@@ -17,6 +17,12 @@ class BalanceCards extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Card(
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+            bottomRight: Radius.circular(30),
+            topRight: Radius.circular(30),
+          ),
+        ),
         color: Colors.white,
         child: Padding(
           padding: const EdgeInsets.all(20.0),

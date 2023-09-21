@@ -21,6 +21,7 @@ class NewMerchant extends StatefulWidget {
 class _NewMerchantState extends State<NewMerchant> {
   final _formKey = GlobalKey<FormState>();
   bool _isEditing = false;
+  bool _isSending = false;
 
   var _name = '';
   var _email = '';
@@ -54,6 +55,9 @@ class _NewMerchantState extends State<NewMerchant> {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
+      setState(() {
+        _isSending = true;
+      });
       final url = Uri.https(
           'v2n-merchant-default-rtdb.firebaseio.com', 'merchants.json');
 
@@ -100,6 +104,10 @@ class _NewMerchantState extends State<NewMerchant> {
         context,
         merchant,
       );
+
+      setState(() {
+        _isSending = false;
+      });
     }
   }
 
@@ -319,16 +327,18 @@ class _NewMerchantState extends State<NewMerchant> {
                             const SizedBox(height: 10),
                             Container(
                               alignment: Alignment.bottomRight,
-                              child: ElevatedButton(
-                                onPressed: _createMerchant,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: logoColors[1],
-                                ),
-                                child: const Text(
-                                  'Onboard',
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                              ),
+                              child: _isSending
+                                  ? CircularProgressIndicator()
+                                  : ElevatedButton(
+                                      onPressed: _createMerchant,
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: logoColors[1],
+                                      ),
+                                      child: const Text(
+                                        'Onboard',
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                    ),
                             ),
                           ],
                         ),

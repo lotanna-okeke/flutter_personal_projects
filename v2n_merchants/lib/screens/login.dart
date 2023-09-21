@@ -38,30 +38,30 @@ class _LoginScreenState extends State<LoginScreen> {
         final output = jsonDecode(response.body);
         final token = output['token'];
         print(token);
-        final url2 = Uri.parse(
-            'http://132.226.206.68/vaswrapper/jsdev/clientmanager/fetch-merchants?page=1&perPage=10');
-        Map<String, String> headers = {
-          "Authorization": 'Bearer $token',
-        };
-        final response2 = await http.get(
-          url2,
-          headers: headers,
-        );
-
-        print(response2.statusCode);
-
-        if (response2.statusCode == 200) {
-          final merchants = jsonDecode(response2.body);
-          print(merchants);
-        }
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(
-        //     builder: (context) => AdminHomeScreen(
-        //       token: token,
-        //     ),
-        //   ),
+        // final url2 = Uri.parse(
+        //     'http://132.226.206.68/vaswrapper/jsdev/clientmanager/fetch-merchants?page=1&perPage=10');
+        // Map<String, String> headers = {
+        //   "Authorization": 'Bearer $token',
+        // };
+        // final response2 = await http.get(
+        //   url2,
+        //   headers: headers,
         // );
+
+        // print(response2.statusCode);
+
+        // if (response2.statusCode == 200) {
+        //   final merchants = jsonDecode(response2.body);
+        //   print(merchants);
+        // }
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => AdminHomeScreen(
+              token: token,
+            ),
+          ),
+        );
       } else {
         ScaffoldMessenger.of(context).clearSnackBars();
         ScaffoldMessenger.of(context).showSnackBar(
@@ -197,7 +197,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         const SizedBox(height: 10),
                         ElevatedButton(
-                          onPressed: login,
+                          onPressed: _login,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: logoColors[1],
                           ),
@@ -218,9 +218,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   right: 30,
                   // bottom: 20,
                 ),
-                child: const Text(
+                child: Text(
                   'By clicking on \"Login\" you agree in our \nTerms of Use and Privacy Policy',
                   textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
                 ),
               ),
             ],

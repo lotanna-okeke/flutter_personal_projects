@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:v2n_merchants/merchant/widgets/balanceCard.dart';
 
 class MerchantHomeScreen extends StatefulWidget {
-  const MerchantHomeScreen({super.key});
+  const MerchantHomeScreen({
+    super.key,
+    required this.changeTab,
+  });
 
+  final void Function(int pageIndex) changeTab;
   @override
   State<MerchantHomeScreen> createState() => _MerchantHomeScreenState();
 }
@@ -107,9 +111,27 @@ class _MerchantHomeScreenState extends State<MerchantHomeScreen> {
                   ),
                 ),
               ),
-              BalanceCards(icon: Icons.call, title: 'Airtel', balance: 2000),
-              BalanceCards(icon: Icons.wifi, title: 'Data', balance: 50000),
-              BalanceCards(icon: Icons.work, title: 'B2B', balance: 400000),
+              GestureDetector(
+                onTap: () {
+                  widget.changeTab(2);
+                },
+                child: const BalanceCards(
+                    icon: Icons.call, title: 'Airtime', balance: 2000),
+              ),
+              GestureDetector(
+                onTap: () {
+                  widget.changeTab(3);
+                },
+                child: const BalanceCards(
+                    icon: Icons.wifi, title: 'Data', balance: 50000),
+              ),
+              GestureDetector(
+                onTap: () {
+                  widget.changeTab(1);
+                },
+                child: const BalanceCards(
+                    icon: Icons.work, title: 'B2B', balance: 400000),
+              ),
             ],
           ),
         ),

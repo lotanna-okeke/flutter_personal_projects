@@ -32,9 +32,9 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: const Color.fromARGB(255, 220, 220, 220),
       ),
       // home: const AdminHomeScreen(),
-      // home: const WelcomeScreen(),
+      home: const WelcomeScreen(),
       // home: const Test(),
-      home: const TabsScreen(),
+      // home: const TabsScreen(),
     );
   }
 }
