@@ -21,13 +21,21 @@ class AdminHomeScreen extends StatefulWidget {
 
 class _AdminHomeScreenState extends State<AdminHomeScreen> {
   List<FetchMerchants> _merchants = [];
+  //to contol the search input
+  final _seachController = TextEditingController();
+
+  // to check whn data is loading
   var _isLoading = true;
+
+  // to control the buttons at the bottom
   bool _isFirstPage = false;
   bool _isLastPage = false;
 
+  bool _statusNotChanged = true;
+
   String? _error;
   int _currentPage = 1;
-  late double _totalPages;
+  double _totalPages = 1;
   int pageSize = 10;
 
   @override
@@ -40,6 +48,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
   }
 
   void setButtons(int page) {
+    print(widget.token);
     if (page == (_totalPages.toInt()) + 1) {
       setState(() {
         _isLastPage = true;
@@ -97,17 +106,17 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
         print(merchant);
         loadedMerchants.add(
           FetchMerchants(
-            id: merchant['id'],
-            name: merchant['name'],
-            username: merchant['username'],
-            role: merchant['role'],
-            parentId: merchant['parentId'],
-            airtimeId: merchant['airtimeId'],
-            dataId: merchant['dataId'],
-            b2bId: merchant['b2bId'],
-            portalId: merchant['portalId'],
-            status: merchant['status'],
-          ),
+              id: merchant['id'],
+              name: merchant['name'],
+              username: merchant['username'],
+              role: merchant['role'],
+              parentId: merchant['parentId'],
+              airtimeId: merchant['airtimeId'],
+              dataId: merchant['dataId'],
+              b2bId: merchant['b2bId'],
+              portalId: merchant['portalId'],
+              status: merchant['status'],
+              isActive: (merchant['status'] == "ACTIVE")),
         );
       }
       setState(() {
@@ -117,7 +126,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
       });
     } else {
       setState(() {
-        _error = "Failed to fetch data. Please try again later.";
+        _error = "Failed to fetch data. Please logout and login again.";
       });
     }
   }
@@ -138,58 +147,84 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     }
   }
 
-  // void _loadItmes() async {
-  //   final url = Uri.parse(
-  //       'https://v2n-merchant-default-rtdb.firebaseio.com/merchants.json?page=10');
-  //   ;
+  void _searchMerchant() async {
+    if (_seachController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          duration: Duration(seconds: 3),
+          content: Text(
+            'Enter Username',
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+      return;
+    }
+    final url = Uri.parse(
+        'http://132.226.206.68/vaswrapper/jsdev/clientmanager/find-merchant');
+    Map<String, String> headers = {
+      "Authorization": 'Bearer ${widget.token}',
+    };
 
-  //   try {
-  //     final response = await http.get(url);
-  //     setState(() {
-  //       if (response.statusCode >= 400) {
-  //         _error = "Failed to fetch data. Please try again later.";
-  //       }
-  //     });
+    //{"message":{"id":"stephenson@gmail.comcacdf17cfc9c4630934c91f8bc75b918","name":"Stephen and Sons","username":
+    //"stephenson@gmail.com","role":"merchant-admin","parentID":null,"airtimeID":"111","dataID":"111","b2bID":"111","portalID":null,
+    //"created":"2023-09-21T10:06:46.000Z","status":"ACTIVE"},"status":200}
+    final response = await http.post(
+      url,
+      headers: headers,
+      body: jsonEncode(
+        {
+          "username": _seachController.text.trim(),
+        },
+      ),
+    );
+    final body = jsonDecode(response.body);
+    final message = body['message'];
+    if (response.statusCode == 200) {
+      final merchant = FetchMerchants(
+        id: message['id'],
+        name: message['name'],
+        username: message['username'],
+        role: message['role'],
+        parentId: message['parentId'],
+        airtimeId: message['airtimeId'],
+        dataId: message['dataId'],
+        b2bId: message['b2bId'],
+        portalId: message['portalId'],
+        status: message['status'],
+      );
 
-  //     if (response.body == 'null') {
-  //       setState(() {
-  //         _isLoading = false;
-  //       });
-  //       return;
-  //     }
-  //     final List<Merchant> loadedMerchants = [];
+      setState(() {
+        _merchants = [merchant];
+      });
+    } else {
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          duration: Duration(seconds: 3),
+          content: Text(
+            'Merchant not found',
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+      _loadData(1);
+      setButtons(1);
+    }
+  }
 
-  //     final Map<String, dynamic> listMerchant = json.decode(response.body);
-
-  //     for (final merchant in listMerchant.entries) {
-  //       loadedMerchants.add(
-  //         Merchant(
-  //           id: merchant.key,
-  //           name: merchant.value['name'],
-  //           email: merchant.value['email'],
-  //           password: merchant.value['password'],
-  //           airtimeId: merchant.value['airtimeId'],
-  //           dataId: merchant.value['dataId'],
-  //           b2bId: merchant.value['b2bId'],
-  //           portalId: merchant.value['portalId'],
-  //           portalPassword: merchant.value['portalPassword'],
-  //           isActive: merchant.value['active'],
-  //         ),
-  //       );
-  //     }
-  //     setState(() {
-  //       _merchants = loadedMerchants;
-  //       // ref
-  //       //     .read(MerchantHandlerProvider.notifier)
-  //       //     .loadMerchants(loadedMerchants);
-  //       _isLoading = false;
-  //     });
-  //   } catch (err) {
-  //     setState(() {
-  //       _error = "Something went wrong. Please try again later.";
-  //     });
-  //   }
-  // }
+  void _addMerchant() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => NewMerchant(
+          token: widget.token!,
+        ),
+      ),
+    );
+    _loadData(_currentPage);
+  }
 
   // void _addMerchant() async {
   //   final newMerchant = await Navigator.push<Merchant>(
@@ -272,18 +307,75 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
   //   });
   // }
 
-  // void changeActiveStatus(Merchant merchant) async {
-  //   final url = Uri.https('v2n-merchant-default-rtdb.firebaseio.com',
-  //       'merchants/${merchant.id}.json');
-  //   await http.patch(
-  //     url,
-  //     body: json.encode(
-  //       {
-  //         'active': merchant.isActive,
-  //       },
-  //     ),
-  //   );
-  // }
+  void editMerchant(FetchMerchants merchant) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => NewMerchant(
+          token: widget.token!,
+          merchant: merchant,
+        ),
+      ),
+    );
+    _loadData(_currentPage);
+  }
+
+  void changeActiveStatus(FetchMerchants merchant) async {
+    print(widget.token);
+    if (merchant.status == "ACTIVE") {
+      final url = Uri.parse(
+          'http://132.226.206.68/vaswrapper/jsdev/clientmanager/suspend-merchant');
+      final response = await http.put(
+        url,
+        headers: {
+          "Authorization": 'Bearer ${widget.token}',
+        },
+        body: jsonEncode(
+          {
+            "username": merchant.username,
+          },
+        ),
+      );
+      if (response.statusCode != 200) {
+        ScaffoldMessenger.of(context).clearSnackBars();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            duration: Duration(seconds: 3),
+            content: Text(
+              '${response.body}\nTry to logout and login again',
+              textAlign: TextAlign.center,
+            ),
+          ),
+        );
+      }
+    } else {
+      final url = Uri.parse(
+          'http://132.226.206.68/vaswrapper/jsdev/clientmanager/activate-merchant');
+      final response = await http.put(
+        url,
+        headers: {
+          "Authorization": 'Bearer ${widget.token}',
+        },
+        body: jsonEncode(
+          {
+            "username": merchant.username,
+          },
+        ),
+      );
+      if (response.statusCode != 200) {
+        ScaffoldMessenger.of(context).clearSnackBars();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            duration: Duration(seconds: 3),
+            content: Text(
+              '${response.body}\nTry to logout and login again',
+              textAlign: TextAlign.center,
+            ),
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -371,6 +463,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                   Card(
                     child: Expanded(
                       child: TextField(
+                        controller: _seachController,
                         style: const TextStyle(
                           color: Colors.black,
                           fontSize: 20,
@@ -387,7 +480,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                     ),
                   ),
                   ElevatedButton(
-                    onPressed: () {},
+                    onPressed: _searchMerchant,
                     child: const Text(
                       'Search',
                       style: TextStyle(fontSize: 18),
@@ -425,7 +518,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                                       children: [
                                         IconButton(
                                           onPressed: () {
-                                            // editMerchant(merchant);
+                                            editMerchant(merchant);
                                           },
                                           color: Colors.black,
                                           icon: const Icon(
@@ -459,26 +552,26 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                                     const Spacer(),
                                     TextButton.icon(
                                       onPressed: () {
+                                        changeActiveStatus(merchant);
                                         setState(() {
-                                          // merchant.isActive = !merchant.isActive;
-                                          // changeActiveStatus(merchant);
+                                          merchant.isActive =
+                                              !merchant.isActive!;
                                         });
                                       },
                                       icon: Icon(
-                                          (merchant.status == "ACTIVE")
+                                          (merchant.isActive!)
                                               ? Icons.thumb_up
                                               : Icons.block,
                                           color: Colors.black),
                                       label: Text(
-                                        (merchant.status == "ACTIVE")
+                                        (merchant.isActive!)
                                             ? 'Active'
                                             : 'Disabled',
                                         style: Theme.of(context)
                                             .textTheme
                                             .titleLarge!
                                             .copyWith(
-                                                color: (merchant.status ==
-                                                        "ACTIVE")
+                                                color: (merchant.isActive!)
                                                     ? Color.fromARGB(
                                                         255, 50, 205, 50)
                                                     : Colors.red),
@@ -519,13 +612,15 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
         ),
         backgroundColor: logoColors[1]!.withOpacity(0.9),
       ),
-      drawer: const AdminDrawer(),
+      drawer: AdminDrawer(
+        token: widget.token!,
+      ),
       body: content,
       floatingActionButton: FloatingActionButton(
         elevation: 5,
         backgroundColor: Colors.white,
         foregroundColor: logoColors[1],
-        onPressed: () {},
+        onPressed: _addMerchant,
         child: const Icon(Icons.add),
       ),
     );

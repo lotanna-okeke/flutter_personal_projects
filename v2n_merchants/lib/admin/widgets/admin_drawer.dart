@@ -3,7 +3,12 @@ import 'package:v2n_merchants/admin/screens/adminHome.dart';
 import 'package:v2n_merchants/admin/screens/new_merchant.dart';
 
 class AdminDrawer extends StatelessWidget {
-  const AdminDrawer({super.key});
+  const AdminDrawer({
+    super.key,
+    required this.token,
+  });
+
+  final String token;
 
   @override
   Widget build(BuildContext context) {
@@ -45,12 +50,7 @@ class AdminDrawer extends StatelessWidget {
                     ),
               ),
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => AdminHomeScreen(),
-                  ),
-                );
+                Navigator.pop(context);
               },
             ),
             SizedBox(
@@ -72,7 +72,9 @@ class AdminDrawer extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const NewMerchant(),
+                    builder: (context) => NewMerchant(
+                      token: token,
+                    ),
                   ),
                 );
               },

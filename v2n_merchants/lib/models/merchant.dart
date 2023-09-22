@@ -41,6 +41,7 @@ class FetchMerchants {
     required this.b2bId,
     required this.portalId,
     required this.status,
+    this.isActive,
   });
 
   final String id;
@@ -53,6 +54,7 @@ class FetchMerchants {
   final String? b2bId;
   final String? portalId;
   final String status;
+  bool? isActive;
 }
 
 class CreateMerchant {

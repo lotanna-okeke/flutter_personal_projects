@@ -10,9 +10,11 @@ class NewMerchant extends StatefulWidget {
   const NewMerchant({
     super.key,
     this.merchant,
+    required this.token,
   });
 
-  final Merchant? merchant;
+  final FetchMerchants? merchant;
+  final String token;
 
   @override
   State<NewMerchant> createState() => _NewMerchantState();
@@ -23,15 +25,16 @@ class _NewMerchantState extends State<NewMerchant> {
   bool _isEditing = false;
   bool _isSending = false;
 
-  var _name = '';
-  var _email = '';
-  var _password = '';
-  var _airtime = '';
-  var _data = '';
-  var _b2b = '';
-  var _portalId = '';
-  var _portalPassword = '';
-  Merchant? merchant;
+  String? _name = '';
+  String? _email = '';
+  String? _password = '';
+  String? _airtime = '';
+  String? _data = '';
+  String? _b2b = '';
+  String? _portalId = '';
+  String? _portalPassword = '';
+  var _oldUserName = "";
+  FetchMerchants? merchant;
 
   @override
   void initState() {
@@ -41,13 +44,13 @@ class _NewMerchantState extends State<NewMerchant> {
       _isEditing = true;
       merchant = widget.merchant;
       _name = merchant!.name;
-      _email = merchant!.email;
-      _password = merchant!.password;
+      _oldUserName = merchant!.username;
+      _email = merchant!.username;
       _airtime = merchant!.airtimeId;
       _data = merchant!.dataId;
       _b2b = merchant!.b2bId;
       _portalId = merchant!.portalId;
-      _portalPassword = merchant!.portalPassword;
+      print(widget.merchant!.airtimeId);
     }
   }
 
@@ -58,60 +61,69 @@ class _NewMerchantState extends State<NewMerchant> {
       setState(() {
         _isSending = true;
       });
-      final url = Uri.https(
-          'v2n-merchant-default-rtdb.firebaseio.com', 'merchants.json');
 
+      final url = Uri.parse(
+          'http://132.226.206.68/vaswrapper/jsdev/clientmanager/create-merchant');
+      Map<String, String> headers = {
+        "Authorization": 'Bearer ${widget.token}',
+      };
       final response = await http.post(
         url,
-        headers: {'Contain-Type': 'application/json'},
+        headers: headers,
+        body: jsonEncode({
+          "name": _name,
+          "username": _email,
+          "password": _password,
+          "airtimeID": _airtime,
+          "dataID": _data,
+          "b2bID": _b2b,
+          "transactionID": _portalId,
+          "transactionPassword": _portalPassword,
+        }),
+      );
+      if (response.statusCode == 201) {
+        Navigator.pop(context);
+      }
+    }
+  }
+
+  void _editMerchant() async {
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
+
+      setState(() {
+        _isSending = true;
+      });
+
+
+      final url = Uri.parse(
+          'http://132.226.206.68/vaswrapper/jsdev/clientmanager/update-merchant');
+      Map<String, String> headers = {
+        "Authorization": 'Bearer ${widget.token}',
+      };
+      final response = await http.put(
+        url,
+        headers: headers,
         body: jsonEncode(
           {
-            'name': _name,
-            'email': _email,
-            "password": _password,
-            "airtimeId": _airtime,
-            'dataId': _data,
-            'b2bId': _b2b,
-            'portalId': _portalId,
-            'portalPassword': _portalPassword,
-            'active': true,
+            "username": _oldUserName,
+            "newName": _name,
+            "newUsername": _email,
+            "newPassword": _password,
+            "airtimeID": _airtime,
+            "dataID": _data,
+            "b2bID": _b2b,
+            "transactionID": _portalId,
+            "transactionPassword": _portalPassword,
           },
         ),
       );
 
-      final Map<String, dynamic> resData = jsonDecode(response.body);
-
-      if (!context.mounted) {
-        return;
+      if (response.statusCode == 200) {
+        Navigator.pop(context);
       }
-
-      final merchant = Merchant(
-        id: resData['name'],
-        name: _name,
-        email: _email,
-        password: _password,
-        airtimeId: _airtime,
-        dataId: _data,
-        b2bId: _b2b,
-        portalId: _portalId,
-        portalPassword: _portalPassword,
-        isActive: true,
-      );
-
-      // ref.read(MerchantHandlerProvider.notifier).addMerchant(merchant);
-
-      Navigator.pop(
-        context,
-        merchant,
-      );
-
-      setState(() {
-        _isSending = false;
-      });
     }
   }
-
-  void _editMerchant() async {}
 
   @override
   Widget build(BuildContext context) {
@@ -179,16 +191,19 @@ class _NewMerchantState extends State<NewMerchant> {
                             ),
                             TextFormField(
                               style: const TextStyle(color: Colors.black),
+                              initialValue: _email,
                               decoration: InputDecoration(
-                                  labelText: 'Email Address',
-                                  hintText: _isEditing
-                                      ? widget.merchant!.email
-                                      : 'john123@gmail.com',
-                                  hintStyle: TextStyle(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .primary
-                                          .withOpacity(0.7))),
+                                labelText: 'Email Address',
+                                hintText: _isEditing
+                                    ? widget.merchant!.username
+                                    : 'john123@gmail.com',
+                                hintStyle: TextStyle(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .primary
+                                      .withOpacity(0.7),
+                                ),
+                              ),
                               keyboardType: TextInputType.emailAddress,
                               autocorrect: false,
                               textCapitalization: TextCapitalization.none,
@@ -207,19 +222,13 @@ class _NewMerchantState extends State<NewMerchant> {
                             ),
                             TextFormField(
                               style: const TextStyle(color: Colors.black),
-                              decoration: InputDecoration(
+                              decoration: const InputDecoration(
                                 labelText: 'Password',
-                                hintText:
-                                    _isEditing ? widget.merchant!.password : "",
                               ),
                               obscureText: true,
                               validator: (value) {
-                                if (value == null ||
-                                    value.trim().length < 6 ||
-                                    !value.contains(RegExp(r'[A-Z]')) ||
-                                    !value.contains(RegExp(r'[a-z]')) ||
-                                    !value.contains(RegExp(r'[0-9]'))) {
-                                  return "Must contain at least 6 chararcters with: \n.A number\n.A capital letter\n.A small letter";
+                                if (value == null || value.trim().length < 6) {
+                                  return "Must contain at least 6 chararcters";
                                 }
                                 return null;
                               },
@@ -228,14 +237,20 @@ class _NewMerchantState extends State<NewMerchant> {
                               },
                             ),
                             TextFormField(
+                              initialValue: _airtime,
                               style: const TextStyle(color: Colors.black),
                               decoration: InputDecoration(
                                 labelText: 'Airtime-ID',
                                 hintText: _isEditing
                                     ? widget.merchant!.airtimeId
                                     : "",
+                                hintStyle: TextStyle(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .primary
+                                      .withOpacity(0.7),
+                                ),
                               ),
-                              obscureText: true,
                               validator: (value) {
                                 if (value == null || value.trim().length < 2) {
                                   return 'Must be at least 2 characters';
@@ -253,8 +268,13 @@ class _NewMerchantState extends State<NewMerchant> {
                                 labelText: 'Data-ID',
                                 hintText:
                                     _isEditing ? widget.merchant!.dataId : "",
+                                hintStyle: TextStyle(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .primary
+                                      .withOpacity(0.7),
+                                ),
                               ),
-                              obscureText: true,
                               validator: (value) {
                                 if (value == null || value.trim().length < 2) {
                                   return 'Must be at least 2 characters';
@@ -272,8 +292,13 @@ class _NewMerchantState extends State<NewMerchant> {
                                 labelText: 'B2B-ID',
                                 hintText:
                                     _isEditing ? widget.merchant!.b2bId : "",
+                                hintStyle: TextStyle(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .primary
+                                      .withOpacity(0.7),
+                                ),
                               ),
-                              obscureText: true,
                               validator: (value) {
                                 if (value == null || value.trim().length < 2) {
                                   return 'Must be at least 2 characters';
@@ -291,8 +316,13 @@ class _NewMerchantState extends State<NewMerchant> {
                                 labelText: 'Portal-ID',
                                 hintText:
                                     _isEditing ? widget.merchant!.portalId : "",
+                                hintStyle: TextStyle(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .primary
+                                      .withOpacity(0.7),
+                                ),
                               ),
-                              obscureText: true,
                               validator: (value) {
                                 if (value == null || value.trim().length < 2) {
                                   return 'Must be at least 2 characters';
@@ -306,11 +336,8 @@ class _NewMerchantState extends State<NewMerchant> {
                             ),
                             TextFormField(
                               style: const TextStyle(color: Colors.black),
-                              decoration: InputDecoration(
+                              decoration: const InputDecoration(
                                 labelText: 'Portal Password',
-                                hintText: _isEditing
-                                    ? widget.merchant!.portalPassword
-                                    : "",
                               ),
                               obscureText: true,
                               validator: (value) {
@@ -330,12 +357,14 @@ class _NewMerchantState extends State<NewMerchant> {
                               child: _isSending
                                   ? CircularProgressIndicator()
                                   : ElevatedButton(
-                                      onPressed: _createMerchant,
+                                      onPressed: _isEditing
+                                          ? _editMerchant
+                                          : _createMerchant,
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: logoColors[1],
                                       ),
-                                      child: const Text(
-                                        'Onboard',
+                                      child: Text(
+                                        _isEditing ? "Edit" : 'Onboard',
                                         style: TextStyle(color: Colors.white),
                                       ),
                                     ),
