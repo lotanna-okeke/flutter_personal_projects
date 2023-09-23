@@ -50,7 +50,6 @@ class _NewMerchantState extends State<NewMerchant> {
       _data = merchant!.dataId;
       _b2b = merchant!.b2bId;
       _portalId = merchant!.portalId;
-      print(widget.merchant!.airtimeId);
     }
   }
 

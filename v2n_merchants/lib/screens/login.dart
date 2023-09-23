@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:v2n_merchants/data.dart';
 import 'package:v2n_merchants/admin/screens/adminHome.dart';
+import 'package:v2n_merchants/merchant/screens/tabs.dart';
 import 'package:v2n_merchants/widgets/term_of_use.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -34,26 +35,23 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       );
 
+      print('login');
+
       if (response.statusCode == 200) {
         final output = jsonDecode(response.body);
         final token = output['token'];
-        print(token);
-        // final url2 = Uri.parse(
-        //     'http://132.226.206.68/vaswrapper/jsdev/clientmanager/fetch-merchants?page=1&perPage=10');
-        // Map<String, String> headers = {
-        //   "Authorization": 'Bearer $token',
-        // };
-        // final response2 = await http.get(
-        //   url2,
-        //   headers: headers,
-        // );
+        final role = output['role'];
 
-        // print(response2.statusCode);
+        if (role == "merchant-admin") {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => TabsScreen(),
+            ),
+          );
+          return;
+        }
 
-        // if (response2.statusCode == 200) {
-        //   final merchants = jsonDecode(response2.body);
-        //   print(merchants);
-        // }
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -66,7 +64,8 @@ class _LoginScreenState extends State<LoginScreen> {
         ScaffoldMessenger.of(context).clearSnackBars();
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Not Admin'),
+            content: Text(
+                'Ensure you have the right username, password and are not suspended\nAlso feel free to check in with our Admins'),
           ),
         );
         return;

@@ -106,17 +106,18 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
         print(merchant);
         loadedMerchants.add(
           FetchMerchants(
-              id: merchant['id'],
-              name: merchant['name'],
-              username: merchant['username'],
-              role: merchant['role'],
-              parentId: merchant['parentId'],
-              airtimeId: merchant['airtimeId'],
-              dataId: merchant['dataId'],
-              b2bId: merchant['b2bId'],
-              portalId: merchant['portalId'],
-              status: merchant['status'],
-              isActive: (merchant['status'] == "ACTIVE")),
+            id: merchant['id'],
+            name: merchant['name'],
+            username: merchant['username'],
+            role: merchant['role'],
+            parentId: merchant['parentId'],
+            airtimeId: merchant['airtimeId'],
+            dataId: merchant['dataId'],
+            b2bId: merchant['b2bId'],
+            portalId: merchant['portalId'],
+            status: merchant['status'],
+            isActive: (merchant['status'] == "ACTIVE"),
+          ),
         );
       }
       setState(() {
@@ -193,6 +194,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
         b2bId: message['b2bId'],
         portalId: message['portalId'],
         status: message['status'],
+        isActive: (message['status'] == "ACTIVE"),
       );
 
       setState(() {
@@ -209,8 +211,8 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
           ),
         ),
       );
-      _loadData(1);
-      setButtons(1);
+      _loadData(_currentPage);
+      setButtons(_currentPage);
     }
   }
 
@@ -226,87 +228,6 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     _loadData(_currentPage);
   }
 
-  // void _addMerchant() async {
-  //   final newMerchant = await Navigator.push<Merchant>(
-  //     context,
-  //     MaterialPageRoute(
-  //       builder: (ctx) => NewMerchant(),
-  //     ),
-  //   );
-  //   if (newMerchant == null) {
-  //     return;
-  //   }
-  //   // setState(() {
-  //   //   _merchants.add(newMerchant);
-  //   // });
-  //   _loadItmes();
-  // }
-
-  // void deleteMerchant(Merchant merchant) async {
-  //   final merchantIndex = _merchants.indexOf(merchant);
-
-  //   // Check if the merchant was found in the list.
-  //   if (merchantIndex != -1) {
-  //     setState(() {
-  //       _merchants.removeAt(merchantIndex);
-  //     });
-  //   } else {
-  //     // Handle the case where the merchant was not found.
-  //     print("Merchant not found: ${merchant.name}");
-  //     return;
-  //   }
-
-  //   final url = Uri.https('v2n-merchant-default-rtdb.firebaseio.com',
-  //       'merchants/${merchant.id}.json');
-  //   final response = await http.delete(url);
-  //   if (response.statusCode == 200) {
-  //     ScaffoldMessenger.of(context).clearSnackBars();
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(
-  //         duration: const Duration(seconds: 3),
-  //         content: Text(
-  //           "${merchant.name} Deleted",
-  //           textAlign: TextAlign.center,
-  //         ),
-  //       ),
-  //     );
-  //   } else {
-  //     ScaffoldMessenger.of(context).clearSnackBars();
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       const SnackBar(
-  //         duration: Duration(seconds: 3),
-  //         content: Text(
-  //           "Invalid URL",
-  //           textAlign: TextAlign.center,
-  //         ),
-  //       ),
-  //     );
-  //     setState(() {
-  //       _merchants.insert(merchantIndex, merchant);
-  //     });
-  //   }
-  //   _loadItmes();
-  // }
-
-  // void editMerchant(Merchant merchant) async {
-  //   final merchantIndex = _merchants.indexOf(merchant);
-  //   final edittedMerchant = await Navigator.push(
-  //     context,
-  //     MaterialPageRoute(
-  //       builder: (context) => NewMerchant(merchant: merchant),
-  //     ),
-  //   );
-
-  //   if (edittedMerchant == null) {
-  //     return;
-  //   }
-
-  //   setState(() {
-  //     _merchants
-  //         .replaceRange(merchantIndex, merchantIndex + 1, [edittedMerchant]);
-  //   });
-  // }
-
   void editMerchant(FetchMerchants merchant) async {
     await Navigator.push(
       context,
@@ -320,60 +241,67 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     _loadData(_currentPage);
   }
 
+  void suspendMerchant(FetchMerchants merchant) async {
+    final url = Uri.parse(
+        'http://132.226.206.68/vaswrapper/jsdev/clientmanager/suspend-merchant');
+    final response = await http.put(
+      url,
+      headers: {
+        "Authorization": 'Bearer ${widget.token}',
+      },
+      body: jsonEncode(
+        {
+          "username": merchant.username,
+        },
+      ),
+    );
+    if (response.statusCode == 200) {
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          duration: Duration(seconds: 3),
+          content: Text(
+            '${response.body}\nTry to logout and login again',
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
+  }
+
+  void activeMerchant(FetchMerchants merchant) async {
+    final url = Uri.parse(
+        'http://132.226.206.68/vaswrapper/jsdev/clientmanager/activate-merchant');
+    final response = await http.put(
+      url,
+      headers: {
+        "Authorization": 'Bearer ${widget.token}',
+      },
+      body: jsonEncode(
+        {
+          "username": merchant.username,
+        },
+      ),
+    );
+    if (response.statusCode == 200) {
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          duration: Duration(seconds: 3),
+          content: Text(
+            '${response.body}\nTry to logout and login again',
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
+  }
+
   void changeActiveStatus(FetchMerchants merchant) async {
-    print(widget.token);
-    if (merchant.status == "ACTIVE") {
-      final url = Uri.parse(
-          'http://132.226.206.68/vaswrapper/jsdev/clientmanager/suspend-merchant');
-      final response = await http.put(
-        url,
-        headers: {
-          "Authorization": 'Bearer ${widget.token}',
-        },
-        body: jsonEncode(
-          {
-            "username": merchant.username,
-          },
-        ),
-      );
-      if (response.statusCode != 200) {
-        ScaffoldMessenger.of(context).clearSnackBars();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            duration: Duration(seconds: 3),
-            content: Text(
-              '${response.body}\nTry to logout and login again',
-              textAlign: TextAlign.center,
-            ),
-          ),
-        );
-      }
+    if (merchant.isActive!) {
+      suspendMerchant(merchant);
     } else {
-      final url = Uri.parse(
-          'http://132.226.206.68/vaswrapper/jsdev/clientmanager/activate-merchant');
-      final response = await http.put(
-        url,
-        headers: {
-          "Authorization": 'Bearer ${widget.token}',
-        },
-        body: jsonEncode(
-          {
-            "username": merchant.username,
-          },
-        ),
-      );
-      if (response.statusCode != 200) {
-        ScaffoldMessenger.of(context).clearSnackBars();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            duration: Duration(seconds: 3),
-            content: Text(
-              '${response.body}\nTry to logout and login again',
-              textAlign: TextAlign.center,
-            ),
-          ),
-        );
-      }
+      activeMerchant(merchant);
     }
   }
 
@@ -514,29 +442,16 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                                           .copyWith(color: Colors.black),
                                     ),
                                     const Spacer(),
-                                    Row(
-                                      children: [
-                                        IconButton(
-                                          onPressed: () {
-                                            editMerchant(merchant);
-                                          },
-                                          color: Colors.black,
-                                          icon: const Icon(
-                                            Icons.edit,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        IconButton(
-                                          onPressed: () {
-                                            // deleteMerchant(merchant);
-                                          },
-                                          color: Colors.black,
-                                          icon: const Icon(
-                                            Icons.delete,
-                                          ),
-                                        ),
-                                      ],
+                                    IconButton(
+                                      onPressed: () {
+                                        editMerchant(merchant);
+                                      },
+                                      color: Colors.black,
+                                      icon: const Icon(
+                                        Icons.edit,
+                                      ),
                                     ),
+                                    const SizedBox(width: 20),
                                   ],
                                 ),
                                 const SizedBox(height: 4),
