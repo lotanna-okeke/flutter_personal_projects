@@ -50,11 +50,6 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     // _loadItmes();
     _loadData(_currentPage);
     setButtons(_currentPage);
-    if (_totalPages == 1) {
-      setState(() {
-        _noPagination = true;
-      });
-    }
   }
 
   void setButtons(int page) {
@@ -107,6 +102,9 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
       final merchants = body['message']['merchants'];
       setState(() {
         _totalPages = body['totalCount'] / pageSize;
+        if ((_totalPages.toInt()) == 0) {
+          _noPagination = true;
+        }
       });
       print(merchants);
 

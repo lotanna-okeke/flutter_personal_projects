@@ -20,8 +20,6 @@ class MerchantHomeScreen extends ConsumerStatefulWidget {
 }
 
 class _MerchantHomeScreenState extends ConsumerState<MerchantHomeScreen> {
-  final ScrollController _scrollController = ScrollController();
-
   List<String> details = [];
   double airtimeBalance = 0;
   double dataBalance = 0;
@@ -39,6 +37,9 @@ class _MerchantHomeScreenState extends ConsumerState<MerchantHomeScreen> {
   }
 
   void fetchAirtimeBalance() async {
+    setState(() {
+      _isLoading = true;
+    });
     final url = Uri.parse(
         'http://132.226.206.68/vaswrapper/jsdev/clientmanager/fetch-airtimeBalance');
 
@@ -80,7 +81,7 @@ class _MerchantHomeScreenState extends ConsumerState<MerchantHomeScreen> {
             airtimeBalance = 0.0;
           }
         }
-        ;
+        _isLoading = false;
       });
     } else {
       ScaffoldMessenger.of(context).clearSnackBars();
@@ -97,6 +98,9 @@ class _MerchantHomeScreenState extends ConsumerState<MerchantHomeScreen> {
   }
 
   void fetchDataBalance() async {
+    setState(() {
+      _isLoading = true;
+    });
     final url = Uri.parse(
         'http://132.226.206.68/vaswrapper/jsdev/clientmanager/fetch-dataBalance');
 
@@ -132,7 +136,7 @@ class _MerchantHomeScreenState extends ConsumerState<MerchantHomeScreen> {
             dataBalance = 0.0;
           }
         }
-        ;
+        _isLoading = false;
       });
     } else {
       ScaffoldMessenger.of(context).clearSnackBars();
@@ -149,6 +153,9 @@ class _MerchantHomeScreenState extends ConsumerState<MerchantHomeScreen> {
   }
 
   void fetchB2bBalance() async {
+    setState(() {
+      _isLoading = true;
+    });
     final url = Uri.parse(
         'http://132.226.206.68/vaswrapper/jsdev/clientmanager/fetch-b2bBalance');
 
@@ -184,7 +191,7 @@ class _MerchantHomeScreenState extends ConsumerState<MerchantHomeScreen> {
             b2bBalance = 0.0;
           }
         }
-        ;
+        _isLoading = false;
       });
       print(b2bBalance);
     } else {
@@ -212,7 +219,7 @@ class _MerchantHomeScreenState extends ConsumerState<MerchantHomeScreen> {
     await Future.delayed(const Duration(seconds: 2));
     setState(() {
       totalBalance = airtimeBalance + dataBalance + b2bBalance;
-      _isLoading = false;
+      // _isLoading = false;
     });
   }
 
@@ -226,41 +233,30 @@ class _MerchantHomeScreenState extends ConsumerState<MerchantHomeScreen> {
     _subMerchantChecker();
 
     super.initState();
-    _scrollController.addListener(() {
-      // Check if the user is scrolling from the top of the screen
-      if (_scrollController.offset <= 0) {
-        _refresh();
-      }
-    });
   }
 
   Future _refresh() async {
-    print('object');
+    // print('object');
     setState(() {
       _isLoading = true;
     });
+    initState();
+
     // fetchBalaces();
   }
 
   @override
   Widget build(BuildContext context) {
-    return NotificationListener<ScrollNotification>(
-      onNotification: (notification) {
-        if (notification is OverscrollNotification) {
-          // Check if the user is overscrolling from the top
-          if (notification.overscroll < 0) {
-            _refresh();
-          }
-        }
-        return false;
-      },
+    return RefreshIndicator(
+      onRefresh: _refresh,
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             //First container for the top of the screen
             Card(
-              shadowColor: Theme.of(context).colorScheme.primary.withOpacity(0.9),
+              shadowColor:
+                  Theme.of(context).colorScheme.primary.withOpacity(0.9),
               color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0),
               // shape: CircleBorder(eccentricity: 0),
               elevation: 40,
@@ -278,7 +274,10 @@ class _MerchantHomeScreenState extends ConsumerState<MerchantHomeScreen> {
                       gradient: LinearGradient(
                         colors: [
                           Theme.of(context).colorScheme.primary,
-                          Theme.of(context).colorScheme.primary.withOpacity(0.6),
+                          Theme.of(context)
+                              .colorScheme
+                              .primary
+                              .withOpacity(0.6),
                         ],
                         begin: Alignment.bottomCenter,
                         end: Alignment.topCenter,
@@ -354,7 +353,8 @@ class _MerchantHomeScreenState extends ConsumerState<MerchantHomeScreen> {
             //Container for all the balances
             Container(
               alignment: Alignment.bottomLeft,
-              margin: const EdgeInsets.all(20),
+              margin: const EdgeInsets.only(
+                  top: 0, bottom: 20, left: 20, right: 20),
               child: Column(
                 children: [
                   Container(

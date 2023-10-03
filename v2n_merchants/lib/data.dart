@@ -14,6 +14,17 @@ String formatNumberWithCommas(double number) {
   return formatter.format(number);
 }
 
+String formatStringNumberWithCommas(String input) {
+  // Parse the input string to a double
+  double value = double.tryParse(input) ?? 0.0;
+
+  // Create a NumberFormat instance for formatting with two decimal places and commas
+  final formatter = NumberFormat("#,##0.00", "en_US");
+
+  // Format the double
+  return formatter.format(value);
+}
+
 void gettest() {
   String inputDate = formatMonth('06-SEP-23 01.44.37.453904 PM');
 

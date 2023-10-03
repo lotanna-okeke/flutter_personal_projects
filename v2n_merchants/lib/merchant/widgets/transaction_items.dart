@@ -39,7 +39,7 @@ class TransactionItems extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Text('₦${transaction.amount}',
+                    Text('₦${formatStringNumberWithCommas(transaction.amount)}',
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.onSurface,
                           fontSize: 30,

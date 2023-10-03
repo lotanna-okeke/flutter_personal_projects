@@ -99,9 +99,9 @@ class _TabsScreenState extends State<TabsScreen> {
         showSelectedLabels: true,
         onTap: _selectPage,
         currentIndex: _selectedPageIndex,
-        items: [
+        items: const [
           BottomNavigationBarItem(
-            icon: const Icon(Icons.home_filled),
+            icon: Icon(Icons.home_filled),
             label: 'Home',
             backgroundColor: Colors.white,
           ),

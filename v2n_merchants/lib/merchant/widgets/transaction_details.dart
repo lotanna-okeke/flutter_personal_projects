@@ -191,7 +191,7 @@ class TransactionDetails extends StatelessWidget {
                 child: Row(
                   children: [
                     Text(
-                      'Amount\n ₦${transaction.amount}',
+                      'Amount\n ₦${formatStringNumberWithCommas(transaction.amount)}',
                       style: const TextStyle(
                         fontSize: 18,
                         color: Colors.black,
@@ -200,7 +200,7 @@ class TransactionDetails extends StatelessWidget {
                     ),
                     const Spacer(),
                     Text(
-                      'Previous Balance\n ₦${transaction.balanceBefore}',
+                      'Previous Balance\n ₦${formatStringNumberWithCommas(transaction.balanceBefore)}',
                       style: const TextStyle(
                         fontSize: 18,
                         color: Colors.black,

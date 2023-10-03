@@ -22,8 +22,8 @@ class BalanceCards extends StatelessWidget {
         shadowColor: Theme.of(context).colorScheme.primary,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
-            bottomRight: Radius.circular(30),
-            topRight: Radius.circular(30),
+            bottomRight: Radius.circular(20),
+            topRight: Radius.circular(20),
           ),
         ),
         // color: Colors.white,
