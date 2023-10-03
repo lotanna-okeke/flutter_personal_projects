@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:v2n_merchants/data.dart';
+import 'package:v2n_merchants/funtions.dart';
 
 class BalanceCards extends StatelessWidget {
   const BalanceCards({

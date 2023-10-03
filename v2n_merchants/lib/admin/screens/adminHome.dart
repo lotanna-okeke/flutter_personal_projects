@@ -3,7 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:v2n_merchants/data.dart';
+import 'package:v2n_merchants/funtions.dart';
 import 'package:v2n_merchants/models/merchant.dart';
 import 'package:v2n_merchants/admin/screens/new_merchant.dart';
 import 'package:v2n_merchants/admin/widgets/admin_drawer.dart';

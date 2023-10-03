@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
-import 'package:v2n_merchants/data.dart';
+import 'package:v2n_merchants/funtions.dart';
 import 'package:v2n_merchants/screens/login.dart';
 import 'package:v2n_merchants/widgets/buildPage.dart';
 

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:v2n_merchants/data.dart';
+import 'package:v2n_merchants/funtions.dart';
 import 'package:v2n_merchants/merchant/widgets/detail_items.dart';
 import 'package:v2n_merchants/models/merchant.dart';
 

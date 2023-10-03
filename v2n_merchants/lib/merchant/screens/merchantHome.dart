@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:v2n_merchants/data.dart';
+import 'package:v2n_merchants/funtions.dart';
 import 'package:v2n_merchants/merchant/screens/new_sub_merchant.dart';
 import 'package:v2n_merchants/merchant/widgets/balanceCard.dart';
 import 'package:v2n_merchants/providers/merchant_handler.dart';

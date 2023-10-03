@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:v2n_merchants/data.dart';
+import 'package:v2n_merchants/funtions.dart';
 
 class TermOfUse extends StatefulWidget {
   const TermOfUse({super.key});

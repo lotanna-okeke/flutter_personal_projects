@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:v2n_merchants/data.dart';
+import 'package:v2n_merchants/funtions.dart';
 import 'package:v2n_merchants/merchant/widgets/transaction_items.dart';
 import 'package:v2n_merchants/models/merchant.dart';
 import 'package:v2n_merchants/providers/merchant_handler.dart';
@@ -25,8 +25,12 @@ class _B2BScreenState extends ConsumerState<B2BScreen> {
   List<FetchTransaction> transactions = [];
 
   String _error = "";
+  bool _isloading = true;
 
-  void _loadTransaction() async {
+  void _loadTransactions() async {
+    setState(() {
+      _isloading = true;
+    });
     final url = Uri.parse(
         'http://132.226.206.68/vaswrapper/jsdev/clientmanager/fetch-transactionLogs?page=1&pageSize=10&b2bQuery=$_selectedFilter');
     final response = await http.post(
@@ -68,6 +72,7 @@ class _B2BScreenState extends ConsumerState<B2BScreen> {
       setState(() {
         transactions = loadedTransactions;
         _error = "";
+        _isloading = false;
       });
       if (transactions.isEmpty) {
         setState(() {
@@ -75,7 +80,6 @@ class _B2BScreenState extends ConsumerState<B2BScreen> {
         });
         return;
       }
-      print(transactions[0].amount);
     }
   }
 
@@ -86,7 +90,7 @@ class _B2BScreenState extends ConsumerState<B2BScreen> {
     filters = ref.read(FilterHandlerProvider);
     super.initState();
     _selectedFilter = filters[0];
-    _loadTransaction();
+    _loadTransactions();
   }
 
   Future _refresh() async {}
@@ -103,21 +107,6 @@ class _B2BScreenState extends ConsumerState<B2BScreen> {
         return TransactionItems(transaction: transaction);
       },
     );
-    // );
-    // Widget content = SingleChildScrollView(
-    //   child: Column(
-    //     crossAxisAlignment: CrossAxisAlignment.stretch,
-    //     children: [
-    //       for (final transaction in transactions)
-    //         ListTile(
-    //           title: Text(
-    //             transaction.amount,
-    //             style: TextStyle(color: Colors.red),
-    //           ),
-    //         ),
-    //     ],
-    //   ),
-    // );
 
     if (_error != "") {
       content = Center(
@@ -127,6 +116,10 @@ class _B2BScreenState extends ConsumerState<B2BScreen> {
           color: Colors.black,
         ),
       ));
+    }
+
+    if (_isloading) {
+      content = const Center(child: CircularProgressIndicator());
     }
 
     return Column(
@@ -167,7 +160,7 @@ class _B2BScreenState extends ConsumerState<B2BScreen> {
                   style:
                       ElevatedButton.styleFrom(backgroundColor: Colors.white),
                   onPressed: () {
-                    _loadTransaction();
+                    _loadTransactions();
                     // String date = formatDate('06-SEP-23 01.44.37.453904 PM');
                     // String time = formatTime('06-SEP-23 01.44.37.453904 PM');
                     // print(date + '\t' + time);
@@ -179,50 +172,8 @@ class _B2BScreenState extends ConsumerState<B2BScreen> {
           ),
         ),
         const SizedBox(height: 20),
-        // Expanded(
-        //   child: RefreshIndicator(
-        //     onRefresh: _refresh,
-        //     backgroundColor: Theme.of(context).colorScheme.primary,
-        //     color: Theme.of(context).colorScheme.onPrimary,
-        //     child: ListView(
-        //       shrinkWrap:
-        //           true, // Set to true to make ListView work inside Column
-        //       children: transactions.map((transaction) {
-        //         return Text('data'); // Replace with your transaction data
-        //       }).toList(),
-        //     ),
-        //   ),
-        // ),
 
         Expanded(child: content),
-
-        // Container(
-        //   margin: EdgeInsets.all(20),
-        //   // alignment: Alignment.center,
-        //   child: content,
-        // )
-        // Container(
-        //   margin: EdgeInsets.all(20),
-        //   color: Colors.green,
-        //   child: Column(
-        //     children: [
-        //       for (final transaction in transactions) Text(transaction.amount),
-        //       ListView(
-        //         children: transactions.map((transaction) {
-        //           return Text('data'); // Replace with your transaction data
-        //         }).toList(),
-        //       ),
-        //     ],
-        //   ),
-        // )
-        // Expanded(
-        //   child: RefreshIndicator(
-        //     onRefresh: _refresh,
-        //     backgroundColor: Theme.of(context).colorScheme.primary,
-        //     color: Theme.of(context).colorScheme.onPrimary,
-        //     child: content,
-        //   ),
-        // ),
       ],
     );
   }

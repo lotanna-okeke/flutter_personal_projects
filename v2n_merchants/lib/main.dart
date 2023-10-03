@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:v2n_merchants/data.dart';
+import 'package:v2n_merchants/funtions.dart';
 import 'package:v2n_merchants/admin/screens/adminHome.dart';
 import 'package:v2n_merchants/admin/screens/new_merchant.dart';
 import 'package:v2n_merchants/merchant/screens/merchantHome.dart';
