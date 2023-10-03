@@ -24,6 +24,8 @@ class _NewMerchantState extends State<NewMerchant> {
   final _formKey = GlobalKey<FormState>();
   bool _isEditing = false;
   bool _isSending = false;
+  bool _obscureText1 = true;
+  bool _obscureText2 = true;
 
   String? _name = '';
   String? _email = '';
@@ -41,6 +43,7 @@ class _NewMerchantState extends State<NewMerchant> {
     // TODO: implement initState
     super.initState();
     if (widget.merchant != null) {
+      print(widget.merchant!.airtimeId);
       _isEditing = true;
       merchant = widget.merchant;
       _name = merchant!.name;
@@ -82,8 +85,30 @@ class _NewMerchantState extends State<NewMerchant> {
       );
       if (response.statusCode == 201) {
         Navigator.pop(context);
+        // ignore: use_build_context_synchronously
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('Created'),
+            content: const Text('Merchant created Successfully'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(ctx);
+                },
+                child: Text(
+                  'Okay',
+                  // style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ],
+          ),
+        );
       }
     }
+    setState(() {
+      _isSending = false;
+    });
   }
 
   void _editMerchant() async {
@@ -93,7 +118,6 @@ class _NewMerchantState extends State<NewMerchant> {
       setState(() {
         _isSending = true;
       });
-
 
       final url = Uri.parse(
           'http://132.226.206.68/vaswrapper/jsdev/clientmanager/update-merchant');
@@ -120,8 +144,30 @@ class _NewMerchantState extends State<NewMerchant> {
 
       if (response.statusCode == 200) {
         Navigator.pop(context);
+        // ignore: use_build_context_synchronously
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('Editted'),
+            content: const Text('Merchant editted Successfully'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(ctx);
+                },
+                child: Text(
+                  'Okay',
+                  // style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ],
+          ),
+        );
       }
     }
+    setState(() {
+      _isSending = false;
+    });
   }
 
   @override
@@ -221,10 +267,18 @@ class _NewMerchantState extends State<NewMerchant> {
                             ),
                             TextFormField(
                               style: const TextStyle(color: Colors.black),
-                              decoration: const InputDecoration(
-                                labelText: 'Password',
-                              ),
-                              obscureText: true,
+                              decoration: InputDecoration(
+                                  labelText: 'Password',
+                                  suffixIcon: IconButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          _obscureText1 = !_obscureText1;
+                                        });
+                                      },
+                                      icon: Icon(_obscureText1
+                                          ? Icons.visibility
+                                          : Icons.visibility_off))),
+                              obscureText: _obscureText1,
                               validator: (value) {
                                 if (value == null || value.trim().length < 6) {
                                   return "Must contain at least 6 chararcters";
@@ -262,6 +316,7 @@ class _NewMerchantState extends State<NewMerchant> {
                               },
                             ),
                             TextFormField(
+                              initialValue: _data,
                               style: const TextStyle(color: Colors.black),
                               decoration: InputDecoration(
                                 labelText: 'Data-ID',
@@ -286,6 +341,7 @@ class _NewMerchantState extends State<NewMerchant> {
                               },
                             ),
                             TextFormField(
+                              initialValue: _b2b,
                               style: const TextStyle(color: Colors.black),
                               decoration: InputDecoration(
                                 labelText: 'B2B-ID',
@@ -310,6 +366,7 @@ class _NewMerchantState extends State<NewMerchant> {
                               },
                             ),
                             TextFormField(
+                              initialValue: _portalId,
                               style: const TextStyle(color: Colors.black),
                               decoration: InputDecoration(
                                 labelText: 'Portal-ID',
@@ -335,10 +392,18 @@ class _NewMerchantState extends State<NewMerchant> {
                             ),
                             TextFormField(
                               style: const TextStyle(color: Colors.black),
-                              decoration: const InputDecoration(
-                                labelText: 'Portal Password',
-                              ),
-                              obscureText: true,
+                              decoration: InputDecoration(
+                                  labelText: 'Portal Password',
+                                  suffixIcon: IconButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          _obscureText2 = !_obscureText2;
+                                        });
+                                      },
+                                      icon: Icon(_obscureText2
+                                          ? Icons.visibility
+                                          : Icons.visibility_off))),
+                              obscureText: _obscureText2,
                               validator: (value) {
                                 if (value == null || value.trim().length < 2) {
                                   return 'Must be at least 2 characters';

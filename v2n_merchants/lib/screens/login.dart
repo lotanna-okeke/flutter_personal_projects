@@ -1,27 +1,35 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:v2n_merchants/data.dart';
 import 'package:v2n_merchants/admin/screens/adminHome.dart';
 import 'package:v2n_merchants/merchant/screens/tabs.dart';
+import 'package:v2n_merchants/providers/merchant_handler.dart';
 import 'package:v2n_merchants/widgets/term_of_use.dart';
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   var _enteredEmail = "";
   var _enteredPassword = "";
+  var error = "";
+  var _isloading = false;
+  bool _obscureText = true;
 
   void _login() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
+      setState(() {
+        _isloading = true;
+      });
 
       final url = Uri.parse(
           'http://132.226.206.68/vaswrapper/jsdev/clientmanager/login');
@@ -35,69 +43,47 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       );
 
-      print('login');
-
       if (response.statusCode == 200) {
         final output = jsonDecode(response.body);
         final token = output['token'];
         final role = output['role'];
 
-        if (role == "merchant-admin") {
-          Navigator.push(
+        if (role != "super-admin") {
+          ref
+              .read(MerchantHandlerProvider.notifier)
+              .loadMerchants([_enteredEmail, token, role]);
+          ref.read(FilterHandlerProvider.notifier).loadFilters(_enteredEmail);
+          Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(
               builder: (context) => TabsScreen(),
             ),
+            (route) => false,
           );
           return;
         }
 
-        Navigator.push(
+        // ignore: use_build_context_synchronously
+        Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(
             builder: (context) => AdminHomeScreen(
               token: token,
             ),
           ),
+          (route) => false,
         );
       } else {
-        ScaffoldMessenger.of(context).clearSnackBars();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-                'Ensure you have the right username, password and are not suspended\nAlso feel free to check in with our Admins'),
-          ),
-        );
+        setState(() {
+          error = "Please ensure you have the right username and password";
+          _isloading = false;
+        });
+        await Future.delayed(const Duration(seconds: 5));
+        setState(() {
+          error = "";
+        });
         return;
       }
-    }
-  }
-
-  void login() async {
-    final apiUrl = Uri.parse(
-        'http://132.226.206.68/vaswrapper/jsdev/clientmanager/fetch-merchants');
-    String bearerToken =
-        "J0oQRMjI8lP6dmP6GNRjDQBg9ezbLcpWClFAgaGjILOuVcam9xMR5gVLVza3FuWUr6ySZlkvdu4M79OuppY5KqAaxgxrGO44BuSORcVqUZEWvTfYmlHd11WnyxjZwzy2w1CgsppbQ4Z5ryfx2Clg8ex8Sw2H4hgottxZQy7mjbXq1u46fXFXKw6MSzJYoDPWaRGjQ0Lu";
-
-    final headers = {
-      'Authorization': 'Bearer $bearerToken',
-    };
-
-// Make an HTTP GET request with headers
-    var response = await http.get(
-      apiUrl,
-      headers: {
-        'Authorization': 'Bearer $bearerToken',
-      },
-    );
-
-    if (response.statusCode == 200) {
-      // Request was successful, handle the response data here
-      print('Response data: ${response.body}');
-    } else {
-      // Request failed, handle errors here
-      print('Request failed with status code: ${response.statusCode}');
-      print('Response data: ${response.body}');
     }
   }
 
@@ -152,8 +138,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           autocorrect: false,
                           textCapitalization: TextCapitalization.none,
                           validator: (value) {
-                            if (value == null) {
-                              return 'Email cannot be empty';
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Must Contain a value';
                             }
 
                             return null;
@@ -164,14 +150,21 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         TextFormField(
                           style: const TextStyle(color: Colors.black),
-                          decoration: const InputDecoration(
-                            labelText: 'Password',
-                          ),
-                          keyboardType: TextInputType.emailAddress,
-                          obscureText: true,
+                          decoration: InputDecoration(
+                              labelText: 'Password',
+                              suffixIcon: IconButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      _obscureText = !_obscureText;
+                                    });
+                                  },
+                                  icon: Icon(_obscureText
+                                      ? Icons.visibility
+                                      : Icons.visibility_off))),
+                          obscureText: _obscureText,
                           validator: (value) {
-                            if (value == null) {
-                              return 'Password cannot be empty';
+                            if (value == null || value.trim().length < 5) {
+                              return 'Must Contain atleast 5 characters';
                             }
 
                             return null;
@@ -181,30 +174,34 @@ class _LoginScreenState extends State<LoginScreen> {
                           },
                         ),
                         const SizedBox(height: 10),
-                        Container(
-                          alignment: Alignment.bottomLeft,
-                          child: TextButton(
-                            onPressed: _showTerms,
-                            child: Text(
-                              'Terms of Use and Privacy Policy',
-                              style: TextStyle(
-                                color: logoColors[1],
+                        (error.isEmpty)
+                            ? const SizedBox(height: 0)
+                            : Container(
+                                alignment: Alignment.bottomLeft,
+                                child: TextButton(
+                                  onPressed: () {},
+                                  child: Text(
+                                    '$error',
+                                    style: TextStyle(
+                                      color: logoColors[1],
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
                               ),
-                              textAlign: TextAlign.end,
-                            ),
-                          ),
-                        ),
                         const SizedBox(height: 10),
-                        ElevatedButton(
-                          onPressed: _login,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: logoColors[1],
-                          ),
-                          child: const Text(
-                            'Login',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ),
+                        _isloading
+                            ? const CircularProgressIndicator()
+                            : ElevatedButton(
+                                onPressed: _login,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: logoColors[1],
+                                ),
+                                child: const Text(
+                                  'Login',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ),
                       ],
                     ),
                   ),
@@ -218,7 +215,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   // bottom: 20,
                 ),
                 child: Text(
-                  'By clicking on \"Login\" you agree in our \nTerms of Use and Privacy Policy',
+                  'Ensure you have the right username and password\nAlso feel free to check in with our Admins to ensure you\'ve not been disabled',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.primary,

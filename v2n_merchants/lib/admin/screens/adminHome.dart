@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -30,13 +31,17 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
   // to control the buttons at the bottom
   bool _isFirstPage = false;
   bool _isLastPage = false;
+  bool _noPagination = false;
 
-  bool _statusNotChanged = true;
+  // bool _statusNotChanged = true;
 
   String? _error;
   int _currentPage = 1;
   double _totalPages = 1;
   int pageSize = 10;
+
+  // To search
+  String _searchText = "";
 
   @override
   void initState() {
@@ -45,6 +50,11 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     // _loadItmes();
     _loadData(_currentPage);
     setButtons(_currentPage);
+    if (_totalPages == 1) {
+      setState(() {
+        _noPagination = true;
+      });
+    }
   }
 
   void setButtons(int page) {
@@ -110,11 +120,11 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
             name: merchant['name'],
             username: merchant['username'],
             role: merchant['role'],
-            parentId: merchant['parentId'],
-            airtimeId: merchant['airtimeId'],
-            dataId: merchant['dataId'],
-            b2bId: merchant['b2bId'],
-            portalId: merchant['portalId'],
+            parentId: merchant['parentID'],
+            airtimeId: merchant['airtimeID'],
+            dataId: merchant['dataID'],
+            b2bId: merchant['b2bID'],
+            portalId: merchant['portalID'],
             status: merchant['status'],
             isActive: (merchant['status'] == "ACTIVE"),
           ),
@@ -150,27 +160,17 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
 
   void _searchMerchant() async {
     if (_seachController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          duration: Duration(seconds: 3),
-          content: Text(
-            'Enter Username',
-            textAlign: TextAlign.center,
-          ),
-        ),
-      );
       return;
     }
+    setState(() {
+      _isLoading = true;
+    });
     final url = Uri.parse(
         'http://132.226.206.68/vaswrapper/jsdev/clientmanager/find-merchant');
     Map<String, String> headers = {
       "Authorization": 'Bearer ${widget.token}',
     };
 
-    //{"message":{"id":"stephenson@gmail.comcacdf17cfc9c4630934c91f8bc75b918","name":"Stephen and Sons","username":
-    //"stephenson@gmail.com","role":"merchant-admin","parentID":null,"airtimeID":"111","dataID":"111","b2bID":"111","portalID":null,
-    //"created":"2023-09-21T10:06:46.000Z","status":"ACTIVE"},"status":200}
     final response = await http.post(
       url,
       headers: headers,
@@ -183,37 +183,40 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     final body = jsonDecode(response.body);
     final message = body['message'];
     if (response.statusCode == 200) {
+      final airtime = message['airtimeID'];
       final merchant = FetchMerchants(
         id: message['id'],
         name: message['name'],
         username: message['username'],
         role: message['role'],
-        parentId: message['parentId'],
-        airtimeId: message['airtimeId'],
-        dataId: message['dataId'],
-        b2bId: message['b2bId'],
-        portalId: message['portalId'],
+        parentId: message['parentID'],
+        airtimeId: airtime,
+        dataId: message['dataID'],
+        b2bId: message['b2bID'],
+        portalId: message['portalID'],
         status: message['status'],
         isActive: (message['status'] == "ACTIVE"),
       );
 
       setState(() {
         _merchants = [merchant];
+        _searchText = "Merchant found";
       });
     } else {
-      ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          duration: Duration(seconds: 3),
-          content: Text(
-            'Merchant not found',
-            textAlign: TextAlign.center,
-          ),
-        ),
-      );
+      setState(() {
+        _searchText = "Merchant not found";
+      });
+      await Future.delayed(const Duration(seconds: 2));
+      setState(() {
+        _searchText = "";
+      });
       _loadData(_currentPage);
       setButtons(_currentPage);
     }
+    setState(() {
+      _isLoading = false;
+    });
+    _seachController.text = "";
   }
 
   void _addMerchant() async {
@@ -255,7 +258,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
         },
       ),
     );
-    if (response.statusCode == 200) {
+    if (response.statusCode != 200) {
       ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -283,7 +286,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
         },
       ),
     );
-    if (response.statusCode == 200) {
+    if (response.statusCode != 200) {
       ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -303,6 +306,21 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     } else {
       activeMerchant(merchant);
     }
+  }
+
+  Future _refresh() async {
+    setState(() {
+      _merchants = [];
+
+      _currentPage = 1;
+      _totalPages = 1;
+
+      // To search
+      _searchText = "";
+    });
+
+    _loadData(_currentPage);
+    setButtons(_currentPage);
   }
 
   @override
@@ -337,12 +355,12 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
       children: [
         ElevatedButton(
           onPressed: _loadPreviousPage,
-          child: Text('Previous Page'),
+          child: Text('Previous'),
         ),
-        SizedBox(width: 16),
+        SizedBox(width: 20),
         ElevatedButton(
           onPressed: _loadNextPage,
-          child: Text('Next Page'),
+          child: Text('Next'),
         ),
       ],
     );
@@ -351,11 +369,15 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
       content = const Center(child: CircularProgressIndicator());
     }
 
+    if (_noPagination) {
+      controlButtons = const Center();
+    }
+
     if (_isFirstPage) {
       controlButtons = Center(
         child: ElevatedButton(
           onPressed: _loadNextPage,
-          child: Text('Next Page'),
+          child: Text('Next'),
         ),
       );
     }
@@ -364,7 +386,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
       controlButtons = Center(
         child: ElevatedButton(
           onPressed: _loadPreviousPage,
-          child: Text('Previous Page'),
+          child: Text('Previous'),
         ),
       );
     }
@@ -373,6 +395,16 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
       content = Center(
           child: Text(
         _error!,
+        style: const TextStyle(
+          color: Colors.black,
+        ),
+      ));
+    }
+
+    if (_searchText == "Merchant not found") {
+      content = Center(
+          child: Text(
+        _searchText,
         style: const TextStyle(
           color: Colors.black,
         ),
@@ -418,100 +450,115 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
               ),
             ),
             Expanded(
-              child: ListView.builder(
-                  itemCount: _merchants.length,
-                  itemBuilder: (context, index) {
-                    final merchant = _merchants[index];
-                    return Column(
-                      children: [
-                        Card(
-                          color: Colors.white,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 15),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Text(
-                                      "${merchant.name}",
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleLarge!
-                                          .copyWith(color: Colors.black),
-                                    ),
-                                    const Spacer(),
-                                    IconButton(
-                                      onPressed: () {
-                                        editMerchant(merchant);
-                                      },
-                                      color: Colors.black,
-                                      icon: const Icon(
-                                        Icons.edit,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 20),
-                                  ],
-                                ),
-                                const SizedBox(height: 4),
-                                Row(
-                                  children: [
-                                    Text(
-                                      merchant.username,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleMedium!
-                                          .copyWith(color: Colors.black),
-                                    ),
-                                    const Spacer(),
-                                    TextButton.icon(
-                                      onPressed: () {
-                                        changeActiveStatus(merchant);
-                                        setState(() {
-                                          merchant.isActive =
-                                              !merchant.isActive!;
-                                        });
-                                      },
-                                      icon: Icon(
-                                          (merchant.isActive!)
-                                              ? Icons.thumb_up
-                                              : Icons.block,
-                                          color: Colors.black),
-                                      label: Text(
-                                        (merchant.isActive!)
-                                            ? 'Active'
-                                            : 'Disabled',
+              child: RefreshIndicator(
+                onRefresh: _refresh,
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                color: Theme.of(context).colorScheme.onPrimary,
+                child: ListView.builder(
+                    itemCount: _merchants.length,
+                    itemBuilder: (context, index) {
+                      final merchant = _merchants[index];
+                      return Column(
+                        children: [
+                          Card(
+                            color: Colors.white,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 15),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Text(
+                                        "${merchant.name}",
                                         style: Theme.of(context)
                                             .textTheme
                                             .titleLarge!
-                                            .copyWith(
-                                                color: (merchant.isActive!)
-                                                    ? Color.fromARGB(
-                                                        255, 50, 205, 50)
-                                                    : Colors.red),
+                                            .copyWith(color: Colors.black),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                              ],
+                                      const Spacer(),
+                                      IconButton(
+                                        onPressed: () {
+                                          editMerchant(merchant);
+                                        },
+                                        color: Colors.black,
+                                        icon: const Icon(
+                                          Icons.edit,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 20),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        merchant.username,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleMedium!
+                                            .copyWith(color: Colors.black),
+                                      ),
+                                      const Spacer(),
+                                      TextButton.icon(
+                                        onPressed: () {
+                                          changeActiveStatus(merchant);
+                                          setState(() {
+                                            merchant.isActive =
+                                                !merchant.isActive!;
+                                          });
+                                        },
+                                        icon: Icon(
+                                            (merchant.isActive!)
+                                                ? Icons.thumb_up
+                                                : Icons.block,
+                                            color: Colors.black),
+                                        label: Text(
+                                          (merchant.isActive!)
+                                              ? 'Active'
+                                              : 'Disabled',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleLarge!
+                                              .copyWith(
+                                                  color: (merchant.isActive!)
+                                                      ? Color.fromARGB(
+                                                          255, 50, 205, 50)
+                                                      : Colors.red),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    );
-                  }),
-            ),
-            Container(
-              padding: const EdgeInsets.only(
-                top: 6.0,
-                bottom: 6.0,
-                left: 6.0,
-                right: 40.0,
+                        ],
+                      );
+                    }),
               ),
-              // color: Colors.black26,
-              child: controlButtons,
             ),
+            (_searchText == "Merchant found")
+                ? TextButton(
+                    onPressed: () {
+                      _refresh();
+                    },
+                    child: const Text(
+                      'Refresh',
+                      style: TextStyle(fontSize: 20),
+                    ),
+                  )
+                : Container(
+                    padding: const EdgeInsets.only(
+                      top: 6.0,
+                      bottom: 6.0,
+                      left: 6.0,
+                      right: 40.0,
+                    ),
+                    // color: Colors.black26,
+                    child: controlButtons,
+                  ),
           ],
         ),
       );
@@ -532,9 +579,9 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
       ),
       body: content,
       floatingActionButton: FloatingActionButton(
-        elevation: 5,
-        backgroundColor: Colors.white,
-        foregroundColor: logoColors[1],
+        elevation: 20,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Colors.white,
         onPressed: _addMerchant,
         child: const Icon(Icons.add),
       ),

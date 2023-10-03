@@ -57,24 +57,38 @@ class FetchMerchants {
   bool? isActive;
 }
 
-class CreateMerchant {
-  CreateMerchant({
-    required this.name,
-    required this.username,
-    required this.password,
-    required this.airtimeId,
-    required this.dataId,
-    required this.b2bId,
-    required this.transactionId,
-    required this.transactionPassword,
+class FetchTransaction {
+  FetchTransaction({
+    required this.amount,
+    required this.balanceBefore,
+    required this.billerCategory,
+    required this.billerDescription,
+    required this.billerId,
+    required this.commission,
+    required this.customerId,
+    required this.dateCreated,
+    required this.extraInfo,
+    required this.referenceId,
+    required this.requestId,
+    required this.reversed,
+    required this.status,
+    required this.walletDescription,
+    this.isSuccessful,
   });
 
-  final String name;
-  final String username;
-  final String password;
-  final String airtimeId;
-  final String dataId;
-  final String b2bId;
-  final String transactionId;
-  final String transactionPassword;
+  final String amount;
+  final String balanceBefore;
+  final String? billerCategory;
+  final String? billerDescription;
+  final String? billerId;
+  final String? commission;
+  final String? customerId;
+  final String? dateCreated;
+  final String? extraInfo;
+  final String? referenceId;
+  final String? requestId;
+  final String? reversed;
+  final String? status;
+  final String? walletDescription;
+  bool? isSuccessful;
 }

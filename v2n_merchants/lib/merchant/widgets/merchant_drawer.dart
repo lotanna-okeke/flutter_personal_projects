@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:v2n_merchants/admin/screens/new_merchant.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:v2n_merchants/merchant/screens/new_sub_merchant.dart';
+import 'package:v2n_merchants/providers/merchant_handler.dart';
 import 'package:v2n_merchants/screens/login.dart';
 
-class AdminDrawer extends StatelessWidget {
-  const AdminDrawer({
+class MerchantDrawer extends ConsumerWidget {
+  const MerchantDrawer({
     super.key,
-    required this.token,
+    required this.changeTab,
   });
 
-  final String token;
+  final void Function(int pageIndex) changeTab;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final _isSubMerchant =
+        ref.read(MerchantHandlerProvider.notifier).isSubMerchant();
     final fullScreen = MediaQuery.of(context).size.width;
 
     return Drawer(
@@ -51,6 +55,7 @@ class AdminDrawer extends StatelessWidget {
               ),
               onTap: () {
                 Navigator.pop(context);
+                changeTab(0);
               },
             ),
             SizedBox(
@@ -60,33 +65,35 @@ class AdminDrawer extends StatelessWidget {
                 color: Theme.of(context).colorScheme.primary,
               ),
             ),
-            ListTile(
-              title: Text(
-                'Create Merchant',
-                style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                      color: Theme.of(context).colorScheme.onBackground,
-                      fontSize: 20,
+            _isSubMerchant
+                ? const SizedBox(width: 0)
+                : ListTile(
+                    title: Text(
+                      'Create Merchant',
+                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                            color: Theme.of(context).colorScheme.onBackground,
+                            fontSize: 20,
+                          ),
                     ),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => NewMerchant(
-                      token: token,
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => NewSubMerchant(),
+                        ),
+                      );
+                    },
+                  ),
+            _isSubMerchant
+                ? const SizedBox(width: 0)
+                : SizedBox(
+                    height: 2,
+                    width: double.infinity,
+                    child: Container(
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
-                );
-              },
-            ),
-            SizedBox(
-              height: 2,
-              width: double.infinity,
-              child: Container(
-                color: Theme.of(context).colorScheme.primary,
-              ),
-            ),
             ListTile(
               title: Text(
                 'Logout',
@@ -99,7 +106,7 @@ class AdminDrawer extends StatelessWidget {
                 Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => LoginScreen(),
+                    builder: (context) => const LoginScreen(),
                   ),
                   (route) => false,
                 );

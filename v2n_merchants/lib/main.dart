@@ -10,7 +10,7 @@ import 'package:v2n_merchants/test.dart';
 
 void main() {
   runApp(
-    const MyApp(),
+    const ProviderScope(child: MyApp()),
   );
 }
 
@@ -21,6 +21,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'VAS2Nets',
       theme: ThemeData.dark().copyWith(
         useMaterial3: true,

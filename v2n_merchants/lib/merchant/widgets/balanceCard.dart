@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:v2n_merchants/data.dart';
 
 class BalanceCards extends StatelessWidget {
   const BalanceCards({
@@ -10,20 +11,23 @@ class BalanceCards extends StatelessWidget {
 
   final IconData icon;
   final String title;
-  final int balance;
+  final double balance;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return Container(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Card(
+        elevation: 5,
+        shadowColor: Theme.of(context).colorScheme.primary,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
             bottomRight: Radius.circular(30),
             topRight: Radius.circular(30),
           ),
         ),
-        color: Colors.white,
+        // color: Colors.white,
+        surfaceTintColor: Theme.of(context).colorScheme.onPrimary,
         child: Padding(
           padding: const EdgeInsets.all(20.0),
           child: Row(
@@ -34,11 +38,14 @@ class BalanceCards extends StatelessWidget {
                 size: 30,
               ),
               const SizedBox(width: 20),
-              Text(
-                "$title: \t\t ₦$balance",
-                style: const TextStyle(
-                  color: Colors.black,
-                  fontSize: 30,
+              Expanded(
+                child: Text(
+                  "$title: ₦${formatNumberWithCommas(balance)}",
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontSize: 30,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
               ),
               // const SizedBox(width: 20),
