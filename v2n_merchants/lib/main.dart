@@ -10,11 +10,21 @@ import 'package:v2n_merchants/screens/welcome.dart';
 import 'package:v2n_merchants/test.dart';
 
 void main() {
+  // // Lock the orientation to portrait mode.
+  // SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+  // SystemChrome.setPreferredOrientations([DeviceOrientation.f])
+  // runApp(
+  //   const ProviderScope(child: MyApp()),
+  // );
+
+  WidgetsFlutterBinding.ensureInitialized();
   // Lock the orientation to portrait mode.
-  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-  runApp(
-    const ProviderScope(child: MyApp()),
-  );
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
+      .then((_) {
+    runApp(
+      const ProviderScope(child: MyApp()),
+    );
+  });
 }
 
 class MyApp extends StatelessWidget {
