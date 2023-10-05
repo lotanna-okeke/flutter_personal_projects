@@ -410,7 +410,7 @@ class _MerchantHomeScreenState extends ConsumerState<MerchantHomeScreen> {
                           ),
                         ),
                         const Text(
-                          'Your Balances',
+                          'Total Balance',
                           style: TextStyle(
                             fontSize: 20,
                           ),

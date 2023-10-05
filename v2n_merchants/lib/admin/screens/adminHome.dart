@@ -48,6 +48,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
   @override
   void initState() {
     // TODO: implement initState
+
     super.initState();
     // _loadItmes();
     _loadData(_currentPage);
@@ -109,6 +110,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
   void _loadData(int page) async {
     setState(() {
       _isLoading = true;
+      _noPagination = false;
     });
     checkConnection();
 
@@ -438,7 +440,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
       controlButtons = const Center();
     }
 
-    if (_isFirstPage) {
+    if (_isFirstPage && !_noPagination) {
       controlButtons = Center(
         child: ElevatedButton(
           onPressed: _loadNextPage,
@@ -447,7 +449,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
       );
     }
 
-    if (_isLastPage) {
+    if (_isLastPage && !_noPagination) {
       controlButtons = Center(
         child: ElevatedButton(
           onPressed: _loadPreviousPage,
