@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -18,18 +19,53 @@ class LoginScreen extends ConsumerStatefulWidget {
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
+  bool _isConnected = true;
+
   var _enteredEmail = "";
   var _enteredPassword = "";
   var error = "";
-  var _isloading = false;
+  var _isLoading = false;
   bool _obscureText = true;
+
+  void checkConnection() async {
+    Timer.periodic(Duration(seconds: 15), (timer) {
+      if (_isLoading) {
+        // If _isLoading is still true after 30 seconds, perform an action.
+        // print(
+        //     'Performing action because _isLoading is still true after 30 seconds.');
+        setState(() {
+          _isConnected = false;
+        });
+
+        // Stop the timer if the action should only be performed once.
+        timer.cancel();
+      } else {
+        // If _isLoading becomes false before 30 seconds, cancel the timer.
+        // print(
+        //     'Not Performing action because _isLoading is not still true after 30 seconds.');
+        setState(() {
+          _isConnected = true;
+          _isLoading = false;
+        });
+        timer.cancel();
+        return;
+      }
+    });
+    // if (!_isConnected) {
+    await Future.delayed(const Duration(seconds: 15));
+    // }
+    setState(() {
+      _isLoading = false;
+    });
+  }
 
   void _login() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
       setState(() {
-        _isloading = true;
+        _isLoading = true;
       });
+      checkConnection();
 
       final url = Uri.parse(
           'http://132.226.206.68/vaswrapper/jsdev/clientmanager/login');
@@ -76,7 +112,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       } else {
         setState(() {
           error = "Please ensure you have the right username and password";
-          _isloading = false;
+          _isLoading = false;
         });
         await Future.delayed(const Duration(seconds: 5));
         setState(() {
@@ -84,6 +120,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         });
         return;
       }
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -95,8 +134,39 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 
+  void refresh() {
+    setState(() {
+      _isLoading = false;
+      _isConnected = true;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    Widget content = Text(
+      'Ensure you have the right username and password\nAlso feel free to check in with our Admins to ensure you\'ve not been disabled',
+      textAlign: TextAlign.center,
+      style: TextStyle(
+        color: Theme.of(context).colorScheme.primary,
+      ),
+    );
+
+    if (!_isConnected) {
+      content = Column(
+        children: [
+          const Text(
+            'Please connect to the internet',
+            style: TextStyle(color: Colors.black),
+          ),
+          // const SizedBox(height: 10),
+          TextButton(
+            onPressed: refresh,
+            child: const Text('Refresh'),
+          ),
+        ],
+      );
+    }
+
     return Scaffold(
       // backgroundColor: Theme.of(context).colorScheme.primaryContainer,
       body: Center(
@@ -190,7 +260,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 ),
                               ),
                         const SizedBox(height: 10),
-                        _isloading
+                        _isLoading
                             ? const CircularProgressIndicator()
                             : ElevatedButton(
                                 onPressed: _login,
@@ -214,13 +284,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   right: 30,
                   // bottom: 20,
                 ),
-                child: Text(
-                  'Ensure you have the right username and password\nAlso feel free to check in with our Admins to ensure you\'ve not been disabled',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
+                child: content,
               ),
             ],
           ),

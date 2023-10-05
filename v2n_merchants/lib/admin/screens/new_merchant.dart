@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -56,6 +57,56 @@ class _NewMerchantState extends State<NewMerchant> {
     }
   }
 
+  void checkConnection() async {
+    Timer.periodic(Duration(seconds: 15), (timer) {
+      if (_isSending) {
+        // If _isSending is still true after 30 seconds, perform an action.
+        print('not connected');
+        // print(
+        //     'Performing action because _isSending is still true after 30 seconds.');
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('No Internet'),
+            content: const Text('Please connect to the internet'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    _isSending = false;
+                  });
+                  Navigator.pop(ctx);
+                },
+                child: Text(
+                  'Okay',
+                  // style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ],
+          ),
+        );
+
+        // Stop the timer if the action should only be performed once.
+        timer.cancel();
+      } else {
+        // If _isSending becomes false before 30 seconds, cancel the timer.
+        // print(
+        //     'Not Performing action because _isSending is not still true after 30 seconds.');
+        setState(() {
+          _isSending = false;
+        });
+        timer.cancel();
+        return;
+      }
+    });
+    // if (!_isConnected) {
+    await Future.delayed(const Duration(seconds: 15));
+    // }
+    setState(() {
+      _isSending = false;
+    });
+  }
+
   void _createMerchant() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
@@ -63,6 +114,7 @@ class _NewMerchantState extends State<NewMerchant> {
       setState(() {
         _isSending = true;
       });
+      checkConnection();
 
       final url = Uri.parse(
           'http://132.226.206.68/vaswrapper/jsdev/clientmanager/create-merchant');
@@ -79,8 +131,8 @@ class _NewMerchantState extends State<NewMerchant> {
           "airtimeID": _airtime,
           "dataID": _data,
           "b2bID": _b2b,
-          "transactionID": _portalId,
-          "transactionPassword": _portalPassword,
+          "portalID": _portalId,
+          "portalPassword": _portalPassword,
         }),
       );
       if (response.statusCode == 201) {
@@ -118,6 +170,7 @@ class _NewMerchantState extends State<NewMerchant> {
       setState(() {
         _isSending = true;
       });
+      checkConnection();
 
       final url = Uri.parse(
           'http://132.226.206.68/vaswrapper/jsdev/clientmanager/update-merchant');
@@ -136,8 +189,8 @@ class _NewMerchantState extends State<NewMerchant> {
             "airtimeID": _airtime,
             "dataID": _data,
             "b2bID": _b2b,
-            "transactionID": _portalId,
-            "transactionPassword": _portalPassword,
+            "portalID": _portalId,
+            "portalPassword": _portalPassword,
           },
         ),
       );

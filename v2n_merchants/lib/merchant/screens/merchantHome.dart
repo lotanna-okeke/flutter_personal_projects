@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -20,13 +21,42 @@ class MerchantHomeScreen extends ConsumerStatefulWidget {
 }
 
 class _MerchantHomeScreenState extends ConsumerState<MerchantHomeScreen> {
+  bool _isConnected = true;
+  bool _isSubMerchant = false;
+
   List<String> details = [];
+  bool _isLoading = true;
+
   double airtimeBalance = 0;
   double dataBalance = 0;
   double b2bBalance = 0;
   double totalBalance = 0;
-  bool _isLoading = true;
-  bool _isSubMerchant = false;
+
+  void checkConnection() async {
+    Timer.periodic(Duration(seconds: 15), (timer) {
+      if (_isLoading) {
+        // If _isLoading is still true after 30 seconds, perform an action.
+        print(
+            'Performing action because _isLoading is still true after 30 seconds.');
+        setState(() {
+          _isConnected = false;
+        });
+
+        // Stop the timer if the action should only be performed once.
+        timer.cancel();
+      } else {
+        // If _isLoading becomes false before 30 seconds, cancel the timer.
+        print(
+            'Not Performing action because _isLoading is not still true after 30 seconds.');
+        setState(() {
+          _isConnected = true;
+          _isLoading = false;
+        });
+
+        timer.cancel();
+      }
+    });
+  }
 
   void _subMerchantChecker() {
     if (details[2] == "sub-merchant-admin") {
@@ -40,6 +70,8 @@ class _MerchantHomeScreenState extends ConsumerState<MerchantHomeScreen> {
     setState(() {
       _isLoading = true;
     });
+    checkConnection();
+
     final url = Uri.parse(
         'http://132.226.206.68/vaswrapper/jsdev/clientmanager/fetch-airtimeBalance');
 
@@ -101,6 +133,7 @@ class _MerchantHomeScreenState extends ConsumerState<MerchantHomeScreen> {
     setState(() {
       _isLoading = true;
     });
+    checkConnection();
     final url = Uri.parse(
         'http://132.226.206.68/vaswrapper/jsdev/clientmanager/fetch-dataBalance');
 
@@ -156,6 +189,7 @@ class _MerchantHomeScreenState extends ConsumerState<MerchantHomeScreen> {
     setState(() {
       _isLoading = true;
     });
+    checkConnection();
     final url = Uri.parse(
         'http://132.226.206.68/vaswrapper/jsdev/clientmanager/fetch-b2bBalance');
 
@@ -219,13 +253,13 @@ class _MerchantHomeScreenState extends ConsumerState<MerchantHomeScreen> {
     await Future.delayed(const Duration(seconds: 2));
     setState(() {
       totalBalance = airtimeBalance + dataBalance + b2bBalance;
-      // _isLoading = false;
     });
   }
 
   @override
   void initState() {
-    // TODO: implement initState
+    checkConnection();
+
     //to get the name, password, and token of a user
     details = ref.read(MerchantHandlerProvider);
     //store the value of the balances in their variables
@@ -239,6 +273,7 @@ class _MerchantHomeScreenState extends ConsumerState<MerchantHomeScreen> {
     // print('object');
     setState(() {
       _isLoading = true;
+      _isConnected = true;
     });
     initState();
 
@@ -247,6 +282,76 @@ class _MerchantHomeScreenState extends ConsumerState<MerchantHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    Widget content = Column(
+      children: [
+        GestureDetector(
+          onTap: () {
+            widget.changeTab(2);
+          },
+          child: BalanceCards(
+            icon: Icons.call,
+            title: 'Airtime',
+            balance: airtimeBalance,
+          ),
+        ),
+        GestureDetector(
+          onTap: () {
+            widget.changeTab(3);
+          },
+          child: BalanceCards(
+            icon: Icons.wifi,
+            title: 'Data',
+            balance: dataBalance,
+          ),
+        ),
+        GestureDetector(
+          onTap: () {
+            widget.changeTab(1);
+          },
+          child: BalanceCards(
+            icon: Icons.work,
+            title: 'B2B',
+            balance: b2bBalance,
+          ),
+        ),
+      ],
+    );
+
+    if (_isLoading) {
+      content = const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            const SizedBox(height: 100),
+            CircularProgressIndicator(),
+          ],
+        ),
+      );
+    }
+
+    if (!_isConnected) {
+      content = Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            const SizedBox(height: 100),
+            Text(
+              'Please connect to the internet',
+              style: TextStyle(color: Colors.black),
+            ),
+            // const SizedBox(height: 10),
+            TextButton(
+                onPressed: () {
+                  _refresh();
+                },
+                child: Text('Refresh'))
+          ],
+        ),
+      );
+    }
+
     return RefreshIndicator(
       onRefresh: _refresh,
       child: SingleChildScrollView(
@@ -311,7 +416,7 @@ class _MerchantHomeScreenState extends ConsumerState<MerchantHomeScreen> {
                           ),
                         ),
                         Text(
-                          _isLoading
+                          (_isLoading || !_isConnected)
                               ? "..."
                               : '₦ ${formatNumberWithCommas(totalBalance)}',
                           style: TextStyle(
@@ -330,14 +435,12 @@ class _MerchantHomeScreenState extends ConsumerState<MerchantHomeScreen> {
                     margin: const EdgeInsets.all(20),
                     child: ElevatedButton.icon(
                       onPressed: () {
-                        print(details[1]);
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => NewSubMerchant(),
                           ),
                         );
-                        fetchBalaces();
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Theme.of(context).colorScheme.primary,
@@ -350,61 +453,23 @@ class _MerchantHomeScreenState extends ConsumerState<MerchantHomeScreen> {
                       ),
                     ),
                   ),
+            Container(
+              alignment: Alignment.bottomLeft,
+              margin: EdgeInsets.symmetric(horizontal: 20),
+              child: Text(
+                'Balances',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
+                  fontSize: 35,
+                ),
+              ),
+            ),
             //Container for all the balances
             Container(
               alignment: Alignment.bottomLeft,
               margin: const EdgeInsets.only(
                   top: 0, bottom: 20, left: 20, right: 20),
-              child: Column(
-                children: [
-                  Container(
-                    alignment: Alignment.bottomLeft,
-                    child: Text(
-                      'Balances',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onSurface,
-                        fontSize: 35,
-                      ),
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      widget.changeTab(2);
-                    },
-                    child: _isLoading
-                        ? const SizedBox(height: 100)
-                        : BalanceCards(
-                            icon: Icons.call,
-                            title: 'Airtime',
-                            balance: airtimeBalance,
-                          ),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      widget.changeTab(3);
-                    },
-                    child: _isLoading
-                        ? const CircularProgressIndicator()
-                        : BalanceCards(
-                            icon: Icons.wifi,
-                            title: 'Data',
-                            balance: dataBalance,
-                          ),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      widget.changeTab(1);
-                    },
-                    child: _isLoading
-                        ? const Text("")
-                        : BalanceCards(
-                            icon: Icons.work,
-                            title: 'B2B',
-                            balance: b2bBalance,
-                          ),
-                  ),
-                ],
-              ),
+              child: content,
             ),
           ],
         ),

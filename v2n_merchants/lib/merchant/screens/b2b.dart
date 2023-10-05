@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -24,13 +25,41 @@ class _B2BScreenState extends ConsumerState<B2BScreen> {
   String _selectedFilter = "";
   List<FetchTransaction> transactions = [];
 
+  bool _isConnected = true;
   String _error = "";
-  bool _isloading = true;
+  bool _isLoading = true;
+
+  void checkConnection() async {
+    Timer.periodic(Duration(seconds: 15), (timer) {
+      if (_isLoading) {
+        // If _isLoading is still true after 30 seconds, perform an action.
+        print(
+            'Performing action because _isLoading is still true after 30 seconds.');
+        setState(() {
+          _isConnected = false;
+        });
+
+        // Stop the timer if the action should only be performed once.
+        timer.cancel();
+      } else {
+        // If _isLoading becomes false before 30 seconds, cancel the timer.
+        print(
+            'Not Performing action because _isLoading is not still true after 30 seconds.');
+        setState(() {
+          _isConnected = true;
+          _isLoading = false;
+        });
+
+        timer.cancel();
+      }
+    });
+  }
 
   void _loadTransactions() async {
     setState(() {
-      _isloading = true;
+      _isLoading = true;
     });
+    checkConnection();
     final url = Uri.parse(
         'http://132.226.206.68/vaswrapper/jsdev/clientmanager/fetch-transactionLogs?page=1&pageSize=10&b2bQuery=$_selectedFilter');
     final response = await http.post(
@@ -72,7 +101,7 @@ class _B2BScreenState extends ConsumerState<B2BScreen> {
       setState(() {
         transactions = loadedTransactions;
         _error = "";
-        _isloading = false;
+        _isLoading = false;
       });
       if (transactions.isEmpty) {
         setState(() {
@@ -93,19 +122,30 @@ class _B2BScreenState extends ConsumerState<B2BScreen> {
     _loadTransactions();
   }
 
-  Future _refresh() async {}
+  Future _refresh() async {
+    setState(() {
+      _isLoading = true;
+      _isConnected = true;
+      username = ref.read(MerchantHandlerProvider)[0];
+      filters = ref.read(FilterHandlerProvider);
+    });
+    _loadTransactions();
+  }
 
   @override
   Widget build(BuildContext context) {
-    Widget content = ListView.builder(
-      itemCount: transactions.length, // Replace with your item count
-      itemBuilder: (context, index) {
-        final transaction = transactions[index];
-        // return ListTile(
-        //   title: Text(transaction.amount),
-        // );
-        return TransactionItems(transaction: transaction);
-      },
+    Widget content = RefreshIndicator(
+      onRefresh: _refresh,
+      child: ListView.builder(
+        itemCount: transactions.length, // Replace with your item count
+        itemBuilder: (context, index) {
+          final transaction = transactions[index];
+          // return ListTile(
+          //   title: Text(transaction.amount),
+          // );
+          return TransactionItems(transaction: transaction);
+        },
+      ),
     );
 
     if (_error != "") {
@@ -118,8 +158,28 @@ class _B2BScreenState extends ConsumerState<B2BScreen> {
       ));
     }
 
-    if (_isloading) {
+    if (_isLoading) {
       content = const Center(child: CircularProgressIndicator());
+    }
+
+    if (!_isConnected) {
+      content = Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          const Text(
+            'Please connect to the internet',
+            style: TextStyle(color: Colors.black),
+          ),
+          // const SizedBox(height: 10),
+          TextButton(
+            onPressed: () {
+              _refresh();
+            },
+            child: const Text('Refresh'),
+          ),
+        ],
+      );
     }
 
     return Column(

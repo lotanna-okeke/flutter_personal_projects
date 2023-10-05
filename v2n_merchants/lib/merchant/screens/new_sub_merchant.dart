@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -19,7 +20,10 @@ class NewSubMerchant extends ConsumerStatefulWidget {
 class _NewSubMerchantState extends ConsumerState<NewSubMerchant> {
   final _formKey = GlobalKey<FormState>();
   bool _isSending = false;
+  bool _isConnected = true;
   bool _obscureText = true;
+
+  String error = "";
 
   String _name = '';
   String _email = '';
@@ -31,6 +35,52 @@ class _NewSubMerchantState extends ConsumerState<NewSubMerchant> {
     super.initState();
   }
 
+  void displayNoInternet() async {
+    setState(() {
+      error = "Please connet to the internet";
+      _isSending = false;
+    });
+
+    await Future.delayed(const Duration(seconds: 5));
+
+    setState(() {
+      error = "";
+    });
+  }
+
+  void checkConnection() async {
+    Timer.periodic(Duration(seconds: 15), (timer) {
+      if (_isSending) {
+        // If _isSending is still true after 30 seconds, perform an action.
+        // print(
+        //     'Performing action because _isSending is still true after 30 seconds.');
+        setState(() {
+          _isConnected = false;
+        });
+
+        // Stop the timer if the action should only be performed once.
+        timer.cancel();
+        displayNoInternet();
+      } else {
+        // If _isSending becomes false before 30 seconds, cancel the timer.
+        // print(
+        //     'Not Performing action because _isSending is not still true after 30 seconds.');
+        setState(() {
+          _isConnected = true;
+          _isSending = false;
+        });
+        timer.cancel();
+        return;
+      }
+    });
+    // if (!_isConnected) {
+    await Future.delayed(const Duration(seconds: 15));
+    // }
+    setState(() {
+      _isSending = false;
+    });
+  }
+
   void _createMerchant() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
@@ -38,6 +88,7 @@ class _NewSubMerchantState extends ConsumerState<NewSubMerchant> {
       setState(() {
         _isSending = true;
       });
+      checkConnection();
 
       final token = ref.read(MerchantHandlerProvider)[1];
 
@@ -226,6 +277,22 @@ class _NewSubMerchantState extends ConsumerState<NewSubMerchant> {
                                 _password = newValue!;
                               },
                             ),
+                            const SizedBox(height: 10),
+                            (error.isEmpty)
+                                ? const SizedBox(height: 0)
+                                : Container(
+                                    alignment: Alignment.center,
+                                    child: TextButton(
+                                      onPressed: () {},
+                                      child: Text(
+                                        '$error',
+                                        style: TextStyle(
+                                          color: logoColors[1],
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                  ),
                             const SizedBox(height: 10),
                             Container(
                               alignment: Alignment.bottomRight,

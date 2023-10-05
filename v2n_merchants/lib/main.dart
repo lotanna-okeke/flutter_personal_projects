@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:v2n_merchants/funtions.dart';
 import 'package:v2n_merchants/admin/screens/adminHome.dart';
@@ -9,6 +10,8 @@ import 'package:v2n_merchants/screens/welcome.dart';
 import 'package:v2n_merchants/test.dart';
 
 void main() {
+  // Lock the orientation to portrait mode.
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   runApp(
     const ProviderScope(child: MyApp()),
   );
@@ -34,7 +37,7 @@ class MyApp extends StatelessWidget {
       ),
       // home: const AdminHomeScreen(),
       home: const WelcomeScreen(),
-      // home: const Test(),
+      // home: CheckInternetConnection(),
       // home: const TabsScreen(),
     );
   }

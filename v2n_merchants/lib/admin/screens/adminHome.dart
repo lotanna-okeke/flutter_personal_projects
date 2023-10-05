@@ -21,6 +21,8 @@ class AdminHomeScreen extends StatefulWidget {
 }
 
 class _AdminHomeScreenState extends State<AdminHomeScreen> {
+  bool _isConnected = true;
+
   List<FetchMerchants> _merchants = [];
   //to contol the search input
   final _seachController = TextEditingController();
@@ -52,6 +54,37 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     setButtons(_currentPage);
   }
 
+  void checkConnection() async {
+    Timer.periodic(const Duration(seconds: 15), (timer) {
+      if (_isLoading) {
+        // If _isLoading is still true after 30 seconds, perform an action.
+        print('not connected');
+        setState(() {
+          _isConnected = false;
+        });
+
+        // Stop the timer if the action should only be performed once.
+        timer.cancel();
+      } else {
+        // If _isLoading becomes false before 30 seconds, cancel the timer.
+        print('connected');
+
+        setState(() {
+          _isConnected = true;
+          _isLoading = false;
+        });
+
+        timer.cancel();
+        return;
+      }
+    });
+    // await Future.delayed(const Duration(seconds: 15));
+    // setState(() {
+    //   _isLoading = false;
+    //   _isConnected = false;
+    // });
+  }
+
   void setButtons(int page) {
     print(widget.token);
     if (page == (_totalPages.toInt()) + 1) {
@@ -77,8 +110,9 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     setState(() {
       _isLoading = true;
     });
+    checkConnection();
 
-    await Future.delayed(const Duration(seconds: 2));
+    await Future.delayed(const Duration(seconds: 1));
 
     //load the data from the API
     _loadMerchants(page);
@@ -163,6 +197,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     setState(() {
       _isLoading = true;
     });
+    checkConnection();
     final url = Uri.parse(
         'http://132.226.206.68/vaswrapper/jsdev/clientmanager/find-merchant');
     Map<String, String> headers = {
@@ -226,7 +261,9 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
         ),
       ),
     );
+    _searchText = "";
     _loadData(_currentPage);
+    setButtons(_currentPage);
   }
 
   void editMerchant(FetchMerchants merchant) async {
@@ -239,7 +276,9 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
         ),
       ),
     );
+    _searchText = "";
     _loadData(_currentPage);
+    setButtons(_currentPage);
   }
 
   void suspendMerchant(FetchMerchants merchant) async {
@@ -308,15 +347,20 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
 
   Future _refresh() async {
     setState(() {
+      _isLoading = true;
+      _isConnected = true;
+    });
+    checkConnection();
+    setState(() {
       _merchants = [];
-
       _currentPage = 1;
       _totalPages = 1;
 
       // To search
       _searchText = "";
+      // _isConnected = false;
     });
-
+    // initState();
     _loadData(_currentPage);
     setButtons(_currentPage);
   }
@@ -332,13 +376,14 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
         children: [
           Text(
             'You got no items yet',
-            style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                  fontSize: 24,
-                ),
+            style: Theme.of(context)
+                .textTheme
+                .titleLarge!
+                .copyWith(fontSize: 24, color: Colors.black),
           ),
           const SizedBox(height: 15),
           Text(
-            'Add an item with the add icon by the top right',
+            'Add an item with the add icon by the bottom right',
             style: Theme.of(context).textTheme.labelMedium!.copyWith(
                   fontSize: 18,
                   color: Theme.of(context).colorScheme.secondary,
@@ -365,6 +410,28 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
 
     if (_isLoading) {
       content = const Center(child: CircularProgressIndicator());
+    }
+
+    if (!_isConnected) {
+      content = Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            const SizedBox(height: 100),
+            Text(
+              'Please connect to the internet',
+              style: TextStyle(color: Colors.black),
+            ),
+            // const SizedBox(height: 10),
+            TextButton(
+                onPressed: () {
+                  _refresh();
+                },
+                child: Text('Refresh'))
+          ],
+        ),
+      );
     }
 
     if (_noPagination) {

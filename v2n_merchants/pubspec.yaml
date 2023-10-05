@@ -40,6 +40,7 @@ dependencies:
   smooth_page_indicator: ^1.1.0
   intl: ^0.18.1
   flutter_launcher_icons: ^0.13.1
+  connectivity_plus: ^4.0.2
   
 
 dev_dependencies:
