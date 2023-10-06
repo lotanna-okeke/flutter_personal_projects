@@ -3,18 +3,23 @@ import 'package:v2n_merchants/funtions.dart';
 
 class BalanceCards extends StatelessWidget {
   const BalanceCards({
-    super.key,
+    Key? key,
     required this.icon,
     required this.title,
     required this.balance,
-  });
+    required this.fontSize,
+  }) : super(key: key);
 
   final IconData icon;
   final String title;
   final double balance;
+  final double fontSize;
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final iconSize = screenWidth > 600 ? 40.0 : 30.0;
+
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Card(
@@ -26,7 +31,6 @@ class BalanceCards extends StatelessWidget {
             topRight: Radius.circular(20),
           ),
         ),
-        // color: Colors.white,
         surfaceTintColor: Theme.of(context).colorScheme.onPrimary,
         child: Padding(
           padding: const EdgeInsets.all(20.0),
@@ -35,27 +39,19 @@ class BalanceCards extends StatelessWidget {
               Icon(
                 icon,
                 color: Colors.black,
-                size: 30,
+                size: iconSize,
               ),
               const SizedBox(width: 20),
               Expanded(
                 child: Text(
                   "$title: ₦${formatNumberWithCommas(balance)}",
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Colors.black,
-                    fontSize: 30,
+                    fontSize: fontSize,
                   ),
                   textAlign: TextAlign.center,
                 ),
               ),
-              // const SizedBox(width: 20),
-              // Text(
-              //   "$title",
-              //   style: const TextStyle(
-              //     color: Colors.black,
-              //     fontSize: 30,
-              //   ),
-              // ),
             ],
           ),
         ),

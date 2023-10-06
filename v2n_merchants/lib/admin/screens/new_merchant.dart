@@ -58,7 +58,7 @@ class _NewMerchantState extends State<NewMerchant> {
   }
 
   void checkConnection() async {
-    Timer.periodic(Duration(seconds: 15), (timer) {
+    Timer.periodic(Duration(seconds: 20), (timer) {
       if (_isSending) {
         // If _isSending is still true after 30 seconds, perform an action.
         print('not connected');
@@ -100,7 +100,7 @@ class _NewMerchantState extends State<NewMerchant> {
       }
     });
     // if (!_isConnected) {
-    await Future.delayed(const Duration(seconds: 15));
+    await Future.delayed(const Duration(seconds: 20));
     // }
     setState(() {
       _isSending = false;

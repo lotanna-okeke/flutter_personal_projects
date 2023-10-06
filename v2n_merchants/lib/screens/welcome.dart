@@ -29,13 +29,16 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(30.0),
+          padding: EdgeInsets.all(screenWidth * 0.1), // Adjust padding
           child: Container(
             alignment: Alignment.center,
-            padding: const EdgeInsets.only(bottom: 80),
+            padding:
+                EdgeInsets.only(bottom: screenWidth * 0.2), // Adjust padding
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -52,16 +55,17 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       return Column(
                         children: [
                           Container(
-                            margin: const EdgeInsets.only(
-                              top: 150,
-                              bottom: 20,
-                              left: 20,
-                              right: 20,
+                            margin: EdgeInsets.only(
+                              top: screenWidth * 0.3, // Adjust margin
+                              bottom: screenWidth * 0.04, // Adjust margin
+                              left: screenWidth * 0.04, // Adjust margin
+                              right: screenWidth * 0.04, // Adjust margin
                             ),
-                            width: 250,
+                            width: screenWidth * 0.6, // Adjust width
                             child: Image.asset('assets\\images\\Logo.png'),
                           ),
-                          const SizedBox(height: 100),
+                          SizedBox(
+                              height: screenWidth * 0.08), // Adjust spacing
                           SmoothPageIndicator(
                             onDotClicked: (index) => _controller.animateToPage(
                               index,
@@ -70,15 +74,16 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                             ),
                             effect: WormEffect(
                               dotColor: Colors.black26,
-                              spacing: 25,
+                              spacing: screenWidth * 0.04, // Adjust spacing
                               activeDotColor: logoColors[1]!,
-                              dotWidth: 10,
-                              dotHeight: 10,
+                              dotWidth: screenWidth * 0.02, // Adjust size
+                              dotHeight: screenWidth * 0.02, // Adjust size
                             ),
                             controller: _controller,
                             count: _numPages,
                           ),
-                          const SizedBox(height: 50),
+                          SizedBox(
+                              height: screenWidth * 0.08), // Adjust spacing
                           OnboardingSlide(
                             // You can customize the content of each slide here
                             // Pass different content for each slide
@@ -97,7 +102,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       ),
       bottomSheet: Container(
         width: double.infinity,
-        margin: EdgeInsets.all(10),
+        margin: EdgeInsets.all(screenWidth * 0.02), // Adjust margin
         decoration: BoxDecoration(
           color: logoColors[1]!,
         ),

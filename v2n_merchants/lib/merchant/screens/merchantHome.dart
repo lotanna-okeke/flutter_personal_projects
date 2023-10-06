@@ -33,7 +33,7 @@ class _MerchantHomeScreenState extends ConsumerState<MerchantHomeScreen> {
   double totalBalance = 0;
 
   void checkConnection() async {
-    Timer.periodic(Duration(seconds: 15), (timer) {
+    Timer.periodic(Duration(seconds: 20), (timer) {
       if (_isLoading) {
         // If _isLoading is still true after 30 seconds, perform an action.
         print(
@@ -282,151 +282,162 @@ class _MerchantHomeScreenState extends ConsumerState<MerchantHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    Widget content = Column(
-      children: [
-        GestureDetector(
-          onTap: () {
-            widget.changeTab(2);
-          },
-          child: BalanceCards(
-            icon: Icons.call,
-            title: 'Airtime',
-            balance: airtimeBalance,
-          ),
+  final screenWidth = MediaQuery.of(context).size.width;
+  final largeScreen = screenWidth > 600;
+
+  Widget content = Column(
+    children: [
+      GestureDetector(
+        onTap: () {
+          widget.changeTab(2);
+        },
+        child: BalanceCards(
+          icon: Icons.call,
+          title: 'Airtime',
+          balance: airtimeBalance,
+          fontSize: largeScreen ? 24.0 : 20.0,
         ),
-        GestureDetector(
-          onTap: () {
-            widget.changeTab(3);
-          },
-          child: BalanceCards(
-            icon: Icons.wifi,
-            title: 'Data',
-            balance: dataBalance,
-          ),
+      ),
+      GestureDetector(
+        onTap: () {
+          widget.changeTab(3);
+        },
+        child: BalanceCards(
+          icon: Icons.wifi,
+          title: 'Data',
+          balance: dataBalance,
+          fontSize: largeScreen ? 24.0 : 20.0,
         ),
-        GestureDetector(
-          onTap: () {
-            widget.changeTab(1);
-          },
-          child: BalanceCards(
-            icon: Icons.work,
-            title: 'B2B',
-            balance: b2bBalance,
-          ),
+      ),
+      GestureDetector(
+        onTap: () {
+          widget.changeTab(1);
+        },
+        child: BalanceCards(
+          icon: Icons.work,
+          title: 'B2B',
+          balance: b2bBalance,
+          fontSize: largeScreen ? 24.0 : 20.0,
         ),
-      ],
+      ),
+    ],
+  );
+
+  if (_isLoading) {
+    content = const Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          const SizedBox(height: 100),
+          CircularProgressIndicator(),
+        ],
+      ),
     );
+  }
 
-    if (_isLoading) {
-      content = const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            const SizedBox(height: 100),
-            CircularProgressIndicator(),
-          ],
-        ),
-      );
-    }
-
-    if (!_isConnected) {
-      content = Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            const SizedBox(height: 100),
-            Text(
-              'Please connect to the internet',
-              style: TextStyle(color: Colors.black),
+  if (!_isConnected) {
+    content = Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          const SizedBox(height: 100),
+          Text(
+            'Please connect to the internet',
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: largeScreen ? 24.0 : 20.0,
             ),
-            // const SizedBox(height: 10),
-            TextButton(
-                onPressed: () {
-                  _refresh();
-                },
-                child: Text('Refresh'))
-          ],
-        ),
-      );
-    }
+          ),
+          TextButton(
+              onPressed: () {
+                _refresh();
+              },
+              child: Text(
+                'Refresh',
+                style: TextStyle(
+                  fontSize: largeScreen ? 24.0 : 20.0,
+                ),
+              ))
+        ],
+      ),
+    );
+  }
 
-    return RefreshIndicator(
-      onRefresh: _refresh,
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            //First container for the top of the screen
-            Card(
-              shadowColor:
-                  Theme.of(context).colorScheme.primary.withOpacity(0.9),
-              color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0),
-              // shape: CircleBorder(eccentricity: 0),
-              elevation: 40,
-              margin: const EdgeInsets.symmetric(horizontal: 10),
-              // clipBehavior: Clip.hardEdge,
-              child: Container(
-                  clipBehavior: Clip.hardEdge,
-                  decoration: BoxDecoration(
-                      borderRadius: const BorderRadius.only(
-                        bottomRight: Radius.circular(20),
-                        bottomLeft: Radius.circular(20),
-                        topRight: Radius.circular(20),
-                        topLeft: Radius.circular(20),
-                      ),
-                      gradient: LinearGradient(
-                        colors: [
-                          Theme.of(context).colorScheme.primary,
-                          Theme.of(context)
-                              .colorScheme
-                              .primary
-                              .withOpacity(0.6),
-                        ],
-                        begin: Alignment.bottomCenter,
-                        end: Alignment.topCenter,
-                      )),
-                  height: (MediaQuery.of(context).size.height) / 3.0,
-                  child: Container(
-                    padding: const EdgeInsets.only(
-                      top: 30,
-                      bottom: 10,
-                      left: 10,
-                      right: 10,
+  return RefreshIndicator(
+    onRefresh: _refresh,
+    child: SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Card(
+            shadowColor:
+                Theme.of(context).colorScheme.primary.withOpacity(0.9),
+            color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0),
+            elevation: 40,
+            margin: EdgeInsets.symmetric(
+                horizontal: largeScreen ? 30 : 10), // Adjust margins
+            child: Container(
+                clipBehavior: Clip.hardEdge,
+                decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.only(
+                      bottomRight: Radius.circular(20),
+                      bottomLeft: Radius.circular(20),
+                      topRight: Radius.circular(20),
+                      topLeft: Radius.circular(20),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        const Icon(
-                          Icons.portrait_outlined,
-                          size: 60,
-                        ),
-                        Text(
-                          'Hello, ${details[0]}',
-                          style: const TextStyle(
-                            fontSize: 25,
-                          ),
-                        ),
-                        const Text(
-                          'Total Balance',
-                          style: TextStyle(
-                            fontSize: 20,
-                          ),
-                        ),
-                        Text(
-                          (_isLoading || !_isConnected)
-                              ? "..."
-                              : '₦ ${formatNumberWithCommas(totalBalance)}',
-                          style: TextStyle(
-                            fontSize: 35,
-                          ),
-                        ),
+                    gradient: LinearGradient(
+                      colors: [
+                        Theme.of(context).colorScheme.primary,
+                        Theme.of(context)
+                            .colorScheme
+                            .primary
+                            .withOpacity(0.6),
                       ],
-                    ),
-                  )),
-            ),
+                      begin: Alignment.bottomCenter,
+                      end: Alignment.topCenter,
+                    )),
+                height: (MediaQuery.of(context).size.height) / (largeScreen ? 3.0 : 2.5), // Adjust height
+                child: Container(
+                  padding: const EdgeInsets.only(
+                    top: 30,
+                    bottom: 10,
+                    left: 10,
+                    right: 10,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      const Icon(
+                        Icons.portrait_outlined,
+                        size: 60,
+                      ),
+                      Text(
+                        'Hello, ${details[0]}',
+                        style: TextStyle(
+                          fontSize: largeScreen ? 28.0 : 25.0,
+                        ),
+                      ),
+                      Text(
+                        'Total Balance',
+                        style: TextStyle(
+                          fontSize: largeScreen ? 24.0 : 20.0,
+                        ),
+                      ),
+                      Text(
+                        (_isLoading || !_isConnected)
+                            ? "..."
+                            : '₦ ${formatNumberWithCommas(totalBalance)}',
+                        style: TextStyle(
+                          fontSize: largeScreen ? 40.0 : 35.0,
+                        ),
+                      ),
+                    ],
+                  ),
+                )),
+          ),
             //Secon Container for the newUser buttom
             _isSubMerchant
                 ? const SizedBox(height: 30)

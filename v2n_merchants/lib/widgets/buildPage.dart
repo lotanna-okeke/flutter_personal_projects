@@ -11,22 +11,25 @@ class OnboardingSlide extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Column(
       children: [
         Text(
           title,
-          style: const TextStyle(
+          style: TextStyle(
             color: Colors.black,
-            fontSize: 24.0,
+            fontSize: screenWidth * 0.06, // Adjust font size
             fontWeight: FontWeight.bold,
           ),
+          textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 10.0),
+        SizedBox(height: screenWidth * 0.02), // Adjust spacing
         Text(
           description,
-          style: const TextStyle(
+          style: TextStyle(
             color: Colors.black,
-            fontSize: 18.0,
+            fontSize: screenWidth * 0.045, // Adjust font size
           ),
           textAlign: TextAlign.center,
         ),

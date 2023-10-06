@@ -5,10 +5,12 @@ class TransactionDetailItems extends StatelessWidget {
     super.key,
     required this.name,
     required this.title,
+    required this.fontSize,
   });
 
   final String title;
   final String? name;
+  final double fontSize;
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +18,7 @@ class TransactionDetailItems extends StatelessWidget {
       title: Text(
         "$title: ${name}",
         textAlign: TextAlign.center,
-        style: TextStyle(fontSize: 15, color: Colors.black),
+        style: TextStyle(fontSize: fontSize, color: Colors.black),
       ),
     );
   }

@@ -28,7 +28,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _obscureText = true;
 
   void checkConnection() async {
-    Timer.periodic(Duration(seconds: 15), (timer) {
+    Timer.periodic(Duration(seconds: 200), (timer) {
       if (_isLoading) {
         // If _isLoading is still true after 30 seconds, perform an action.
         // print(
@@ -52,7 +52,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       }
     });
     // if (!_isConnected) {
-    await Future.delayed(const Duration(seconds: 15));
+    await Future.delayed(const Duration(seconds: 200));
     // }
     setState(() {
       _isLoading = false;

@@ -39,7 +39,7 @@ class _B2BScreenState extends ConsumerState<B2BScreen> {
   int pageSize = 10;
 
   void checkConnection() async {
-    Timer.periodic(Duration(seconds: 15), (timer) {
+    Timer.periodic(Duration(seconds: 20), (timer) {
       if (_isLoading) {
         // If _isLoading is still true after 30 seconds, perform an action.
         print(

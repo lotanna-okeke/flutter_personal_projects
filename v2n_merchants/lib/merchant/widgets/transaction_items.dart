@@ -5,9 +5,9 @@ import 'package:v2n_merchants/models/merchant.dart';
 
 class TransactionItems extends StatelessWidget {
   const TransactionItems({
-    super.key,
+    Key? key,
     required this.transaction,
-  });
+  }) : super(key: key);
 
   final FetchTransaction transaction;
 
@@ -17,59 +17,72 @@ class TransactionItems extends StatelessWidget {
     final _isSuccess = transaction.isSuccessful;
 
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 20),
-      child: InkWell(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) =>
-                  TransactionDetails(transaction: transaction),
-            ),
-          );
-        },
-        child: Card(
-          elevation: 2,
-          shadowColor: Theme.of(context).colorScheme.primary,
-          surfaceTintColor: Colors.white,
+      margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      child: Card(
+        elevation: 2,
+        shadowColor: Theme.of(context).colorScheme.primary,
+        surfaceTintColor: Colors.white,
+        child: InkWell(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) =>
+                    TransactionDetails(transaction: transaction),
+              ),
+            );
+          },
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 15),
+            padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
-                    Text('₦${formatStringNumberWithCommas(transaction.amount)}',
+                    Expanded(
+                      flex: 2, // Allocate 2/3 of the available space
+                      child: Text(
+                        '₦${formatStringNumberWithCommas(transaction.amount)}',
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.onSurface,
-                          fontSize: 30,
-                        )),
-                    const Spacer(),
-                    Text('${date}',
+                          fontSize: 20,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      flex: 1, // Allocate 1/3 of the available space
+                      child: Text(
+                        '${date}',
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.onBackground,
-                          fontSize: 25,
-                        )),
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 10),
                 Row(
                   children: [
-                    Text(
-                      '${transaction.billerDescription}',
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleMedium!
-                          .copyWith(color: Colors.black),
+                    Expanded(
+                      flex: 2, // Allocate 2/3 of the available space
+                      child: Text(
+                        '${transaction.billerDescription}',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 18,
+                        ),
+                      ),
                     ),
-                    const Spacer(),
-                    TextButton(
-                      onPressed: () {},
+                    Expanded(
+                      flex: 1, // Allocate 1/3 of the available space
                       child: Text(
                         '${transaction.status}',
                         style: TextStyle(
-                            fontSize: 20,
-                            color: _isSuccess! ? Colors.green : Colors.red),
+                          fontSize: 16,
+                          color: _isSuccess! ? Colors.green : Colors.red,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ],

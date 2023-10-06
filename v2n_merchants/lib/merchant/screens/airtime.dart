@@ -36,7 +36,7 @@ class _AirtimeScreenState extends ConsumerState<AirtimeScreen> {
   int pageSize = 10;
 
   void checkConnection() async {
-    Timer.periodic(Duration(seconds: 15), (timer) {
+    Timer.periodic(Duration(seconds: 20), (timer) {
       if (_isLoading) {
         // If _isLoading is still true after 30 seconds, perform an action.
         print(
@@ -184,6 +184,8 @@ class _AirtimeScreenState extends ConsumerState<AirtimeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
     Widget controlButtons = Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -191,7 +193,7 @@ class _AirtimeScreenState extends ConsumerState<AirtimeScreen> {
           onPressed: _loadPreviousPage,
           child: Text('Previous'),
         ),
-        SizedBox(width: 20),
+        SizedBox(width: screenWidth * 0.1),
         ElevatedButton(
           onPressed: _loadNextPage,
           child: Text('Next'),
@@ -230,9 +232,6 @@ class _AirtimeScreenState extends ConsumerState<AirtimeScreen> {
               itemCount: transactions.length, // Replace with your item count
               itemBuilder: (context, index) {
                 final transaction = transactions[index];
-                // return ListTile(
-                //   title: Text(transaction.amount),
-                // );
                 return TransactionItems(transaction: transaction);
               },
             ),
@@ -244,12 +243,13 @@ class _AirtimeScreenState extends ConsumerState<AirtimeScreen> {
 
     if (_isError) {
       content = Center(
-          child: Text(
-        _error,
-        style: const TextStyle(
-          color: Colors.black,
+        child: Text(
+          _error,
+          style: const TextStyle(
+            color: Colors.black,
+          ),
         ),
-      ));
+      );
     }
 
     if (_isLoading) {
@@ -261,16 +261,16 @@ class _AirtimeScreenState extends ConsumerState<AirtimeScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.max,
         children: [
-          const Text(
+          Text(
             'Please connect to the internet',
             style: TextStyle(color: Colors.black),
           ),
-          // const SizedBox(height: 10),
+          SizedBox(height: screenWidth * 0.02), // Adjust spacing
           TextButton(
             onPressed: () {
               _refresh();
             },
-            child: const Text('Refresh'),
+            child: Text('Refresh'),
           ),
         ],
       );
@@ -280,14 +280,14 @@ class _AirtimeScreenState extends ConsumerState<AirtimeScreen> {
       children: [
         Container(
           alignment: Alignment.bottomLeft,
-          margin: const EdgeInsets.all(20),
+          margin: EdgeInsets.all(screenWidth * 0.05), // Adjust margin
           child: (_isError || _isLoading)
               ? null
               : Text(
                   'Transaction History',
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.onSurface,
-                    fontSize: 25,
+                    fontSize: screenWidth * 0.06, // Adjust font size
                   ),
                 ),
         ),
