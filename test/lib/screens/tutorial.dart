@@ -72,7 +72,7 @@ class TutorialScreen extends StatelessWidget {
                 Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const AuthScreen(),
+                      builder: (context) => AuthScreen(),
                     ));
               },
               style: ElevatedButton.styleFrom(

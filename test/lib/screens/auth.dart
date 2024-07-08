@@ -1,8 +1,12 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:test/screens/home_screen.dart';
 import 'package:test/widgets/auth_title_container.dart';
 
+final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+
 class AuthScreen extends StatefulWidget {
-  const AuthScreen({super.key});
+  const AuthScreen({Key? key}) : super(key: key);
 
   @override
   State<AuthScreen> createState() => _AuthScreenState();
@@ -12,6 +16,81 @@ class _AuthScreenState extends State<AuthScreen> {
   final _formKey = GlobalKey<FormState>();
   bool _obscureText = true;
   bool _isLogin = false;
+  String? _enteredName;
+  String? _enteredPhoneNumber;
+  String _enteredEmail = "";
+  String _enteredPassword = "";
+  String? _enteredConfirmPassword;
+
+  void _submit() async {
+    final isValid = _formKey.currentState!.validate();
+    if (!isValid) {
+      return;
+    }
+    _formKey.currentState!.save();
+
+    try {
+      if (_isLogin) {
+        final userCredential = await _firebaseAuth.signInWithEmailAndPassword(
+            email: _enteredEmail, password: _enteredPassword);
+        print("User signed in: ${userCredential.user!.email}");
+      } else {
+        final userCredentials =
+            await _firebaseAuth.createUserWithEmailAndPassword(
+                email: _enteredEmail, password: _enteredPassword);
+        print("User signed up: ${userCredentials.user!.email}");
+      }
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => HomeScreen(),
+        ),
+      );
+    } on FirebaseAuthException catch (error) {
+      String errorMessage;
+      switch (error.code) {
+        case 'network-request-failed':
+          errorMessage =
+              "Network error occurred. Please check your connection and try again.";
+          break;
+        case 'email-already-in-use':
+          errorMessage =
+              "The email address is already in use by another account.";
+          break;
+        case 'invalid-email':
+          errorMessage = "The email address is not valid.";
+          break;
+        case 'operation-not-allowed':
+          errorMessage = "Operation not allowed. Please contact support.";
+          break;
+        case 'weak-password':
+          errorMessage = "The password is too weak.";
+          break;
+        case 'user-disabled':
+          errorMessage = "The user account has been disabled.";
+          break;
+        case 'user-not-found':
+          errorMessage = "No user found with this email.";
+          break;
+        case 'wrong-password':
+          errorMessage = "Incorrect password.";
+          break;
+        default:
+          errorMessage = error.message ?? "Authentication failed.";
+          break;
+      }
+
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(errorMessage),
+        ),
+      );
+    } catch (e) {
+      print("Error: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -83,6 +162,15 @@ class _AuthScreenState extends State<AuthScreen> {
                         ),
                         keyboardType: TextInputType.name,
                         autocorrect: false,
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return "Please enter a name.";
+                          }
+                          return null;
+                        },
+                        onSaved: (value) {
+                          _enteredName = value!;
+                        },
                       ),
                     ),
                   ),
@@ -116,6 +204,15 @@ class _AuthScreenState extends State<AuthScreen> {
                         ),
                         keyboardType: TextInputType.phone,
                         autocorrect: false,
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return "Please enter your phone number.";
+                          }
+                          return null;
+                        },
+                        onSaved: (value) {
+                          _enteredPhoneNumber = value!;
+                        },
                       ),
                     ),
                   ),
@@ -149,6 +246,17 @@ class _AuthScreenState extends State<AuthScreen> {
                       keyboardType: TextInputType.emailAddress,
                       autocorrect: false,
                       textCapitalization: TextCapitalization.none,
+                      validator: (value) {
+                        if (value == null ||
+                            value.trim().isEmpty ||
+                            !value.contains('@')) {
+                          return "Please enter a valid email.";
+                        }
+                        return null;
+                      },
+                      onSaved: (value) {
+                        _enteredEmail = value!;
+                      },
                     ),
                   ),
                 ),
@@ -190,6 +298,15 @@ class _AuthScreenState extends State<AuthScreen> {
                         ),
                       ),
                       obscureText: _obscureText,
+                      validator: (value) {
+                        if (value == null || value.trim().length < 8) {
+                          return "Must be at least 8 characters long";
+                        }
+                        return null;
+                      },
+                      onSaved: (value) {
+                        _enteredPassword = value!;
+                      },
                     ),
                   ),
                 ),
@@ -214,7 +331,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       child: TextFormField(
                         style: const TextStyle(fontSize: 14),
                         decoration: InputDecoration(
-                          hintText: "Min. 8 characters",
+                          hintText: "Match Password",
                           hintStyle: const TextStyle(
                             color: Colors.grey,
                           ),
@@ -233,13 +350,22 @@ class _AuthScreenState extends State<AuthScreen> {
                           ),
                         ),
                         obscureText: _obscureText,
+                        // validator: (value) {
+                        //   if (value == null || value != _enteredPassword) {
+                        //     return "Passwords do not match";
+                        //   }
+                        //   return null;
+                        // },
+                        onSaved: (value) {
+                          _enteredConfirmPassword = value!;
+                        },
                       ),
                     ),
                   ),
                 const SizedBox(height: 30),
                 if (_isLogin)
                   ElevatedButton(
-                    onPressed: () {},
+                    onPressed: _submit,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).colorScheme.primary,
                     ),
@@ -247,6 +373,24 @@ class _AuthScreenState extends State<AuthScreen> {
                       padding: EdgeInsets.symmetric(horizontal: 45),
                       child: Text(
                         'Login',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                    ),
+                  ),
+                if (!_isLogin)
+                  ElevatedButton(
+                    onPressed: _submit,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                    ),
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 45),
+                      child: Text(
+                        'Sign up',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 16,
@@ -284,24 +428,6 @@ class _AuthScreenState extends State<AuthScreen> {
                   ],
                 ),
                 const SizedBox(height: 10),
-                if (!_isLogin)
-                  ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                    ),
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 45),
-                      child: Text(
-                        'Sign up',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                    ),
-                  ),
                 if (_isLogin)
                   TextButton(
                     onPressed: () {},
