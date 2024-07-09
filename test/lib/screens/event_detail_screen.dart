@@ -1,6 +1,8 @@
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart'; // Import intl package for date formatting
 import 'package:test/data/functions.dart';
 import 'package:test/models/event.dart';
@@ -317,7 +319,13 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
             Row(
               children: [
                 Text('Description: ', style: TextStyle(fontSize: 14)),
-                Text((widget.event.content), style: TextStyle(fontSize: 16)),
+                Flexible(
+                    child: Text(
+                  (widget.event.content),
+                  style: TextStyle(fontSize: 16),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                )),
               ],
             ),
             SizedBox(height: 30),
