@@ -21,6 +21,14 @@ class _AuthScreenState extends State<AuthScreen> {
   String _enteredEmail = "";
   String _enteredPassword = "";
   String? _enteredConfirmPassword;
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    FirebaseAuth.instance.signOut();
+  }
 
   void _submit() async {
     final isValid = _formKey.currentState!.validate();
@@ -30,6 +38,9 @@ class _AuthScreenState extends State<AuthScreen> {
     _formKey.currentState!.save();
 
     try {
+      setState(() {
+        _isLoading = true;
+      });
       if (_isLogin) {
         final userCredential = await _firebaseAuth.signInWithEmailAndPassword(
             email: _enteredEmail, password: _enteredPassword);
@@ -87,8 +98,14 @@ class _AuthScreenState extends State<AuthScreen> {
           content: Text(errorMessage),
         ),
       );
+      setState(() {
+        _isLoading = false;
+      });
     } catch (e) {
       print("Error: $e");
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -364,41 +381,47 @@ class _AuthScreenState extends State<AuthScreen> {
                   ),
                 const SizedBox(height: 30),
                 if (_isLogin)
-                  ElevatedButton(
-                    onPressed: _submit,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                    ),
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 45),
-                      child: Text(
-                        'Login',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w400,
+                  _isLoading
+                      ? const CircularProgressIndicator()
+                      : ElevatedButton(
+                          onPressed: _submit,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                Theme.of(context).colorScheme.primary,
+                          ),
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 45),
+                            child: Text(
+                              'Login',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                  ),
                 if (!_isLogin)
-                  ElevatedButton(
-                    onPressed: _submit,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                    ),
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 45),
-                      child: Text(
-                        'Sign up',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w400,
+                  _isLoading
+                      ? const CircularProgressIndicator()
+                      : ElevatedButton(
+                          onPressed: _submit,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                Theme.of(context).colorScheme.primary,
+                          ),
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 45),
+                            child: Text(
+                              'Sign up',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                  ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

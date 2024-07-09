@@ -19,8 +19,6 @@ class HomeScreen extends StatefulWidget {
   _HomeScreenState createState() => _HomeScreenState();
 }
 
-var uid = FirebaseAuth.instance.currentUser!.uid;
-
 class _HomeScreenState extends State<HomeScreen> {
   late Future<List<Event>> diaryEntriesFuture;
   final int _itemsPerPage = 10; // Number of items per page
@@ -32,18 +30,11 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
 
-    print(uid);
     tz.initializeTimeZones();
-    diaryEntriesFuture = fetchEvents(uid);
-  }
+    var uid = FirebaseAuth.instance.currentUser!.uid;
+    print(uid);
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // Re-fetch events whenever the widget's dependencies change
-    setState(() {
-      diaryEntriesFuture = fetchEvents(uid);
-    });
+    diaryEntriesFuture = fetchEvents(uid);
   }
 
   void _addEvent() async {

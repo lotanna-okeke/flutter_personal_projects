@@ -313,7 +313,14 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                 ],
               ),
             ],
-            SizedBox(height: 40),
+            SizedBox(height: 10),
+            Row(
+              children: [
+                Text('Description: ', style: TextStyle(fontSize: 14)),
+                Text((widget.event.content), style: TextStyle(fontSize: 16)),
+              ],
+            ),
+            SizedBox(height: 30),
             Row(
               children: [
                 Text('Remind Me:',

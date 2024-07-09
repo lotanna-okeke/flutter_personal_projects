@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:test/screens/auth.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
@@ -33,6 +34,8 @@ class AppDrawer extends StatelessWidget {
               // Implement logout functionality here
               try {
                 await FirebaseAuth.instance.signOut();
+                Navigator.pushReplacement(context,
+                    MaterialPageRoute(builder: (context) => AuthScreen()));
                 print('tester');
                 // Navigator.pop(context); // Close the drawer
               } catch (e) {
